@@ -1,5 +1,8 @@
 package com.barbearia.model;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
+@SQLDelete(sql = "UPDATE TB_BARBEIRO SET BARB_Status = 0 WHERE BarbeiroId = ?")
 
 @Entity
 @Table(name = "TB_BARBEIRO")
@@ -25,6 +30,8 @@ public class Barbeiro {
     @Column(name = "BARB_Nome", length = 100 ,nullable = false)
     private String nome;
 
+    @Column(name = "BARB_Status", nullable = false)
+    private Integer status = 1;
 
     public Barbeiro() {
     }
@@ -52,4 +59,14 @@ public class Barbeiro {
     public void setNome(String nome) {
         this.nome = nome;
     }
+
+
+    public Integer getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
 }
