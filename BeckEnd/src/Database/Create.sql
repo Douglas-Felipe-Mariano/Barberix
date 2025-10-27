@@ -15,6 +15,7 @@ CREATE TABLE TB_USUARIO (UsuarioId         INT              IDENTITY PRIMARY KEY
 						,USU_Email         VARCHAR(100)     NOT NULL        UNIQUE
 						,USU_Senha         VARCHAR(100)     NOT NULL         
 						,USU_DataCadastro  DATETIME2        NOT NULL        DEFAULT GETDATE()
+						,USU_Status 	   BIT 				NOT NULL  		DEFAULT 1
 						,CONSTRAINT FK_USUARIO_PERFIL   FOREIGN KEY (PerfilId) REFERENCES TB_PERFIL(PerfilId));
 
 CREATE TABLE TB_SERVICO (ServicoId                   INT             PRIMARY KEY     IDENTITY
@@ -25,6 +26,7 @@ CREATE TABLE TB_SERVICO (ServicoId                   INT             PRIMARY KEY
 CREATE TABLE TB_BARBEIRO (BarbeiroId     INT   		   IDENTITY PRIMARY KEY
 						 ,UsuarioId	  	 INT   		   NOT NULL
 						 ,BARB_Nome      VARCHAR(100)  NOT NULL
+						 ,BARB_Status	 BIT		   NOT NULL DEFAULT 1
 
 						 ,CONSTRAINT FK_BARBEIRO_USUARIO FOREIGN KEY (UsuarioId) REFERENCES TB_USUARIO(UsuarioId));
 

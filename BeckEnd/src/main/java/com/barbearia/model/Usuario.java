@@ -3,6 +3,8 @@ package com.barbearia.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,14 +15,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+@SQLDelete(sql = "UPDATE TB_USUARIO SET USU_Status = 0 WHERE UsuarioId = ? ")
+@Where(clause = "USU_Status = 1")
 @Entity
 @Table(name = "TB_USUARIO")
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UsuarioId")
     private Integer usuarioId;
+
+    @Column(name = "USU_Status", nullable = false)
+    private Integer status = 1; // Já inicia como 1 Ativo
 
     @ManyToOne  
     @JoinColumn(name = "PerfilId", nullable = false)
@@ -77,4 +83,13 @@ public class Usuario {
     public void setDataCadastro(LocalDateTime dataCadastro) {
         this.dataCadastro = dataCadastro;
     }
+
+    public Integer getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+    
 }
