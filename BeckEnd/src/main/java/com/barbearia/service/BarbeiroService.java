@@ -33,7 +33,7 @@ public class BarbeiroService {
         return barbeiroRepository.findByStatus(1);
     }
 
-    public Optional<Barbeiro> buscarBarbeirosAtivosPorId(Integer id){
+    public Optional<Barbeiro> buscarBarbeiroAtivosPorId(Integer id){
         return barbeiroRepository.findByBarbeiroIdAndStatus(id, 1);
     }
 
