@@ -1,6 +1,7 @@
 package com.barbearia.model;
 
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

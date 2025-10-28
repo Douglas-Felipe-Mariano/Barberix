@@ -56,6 +56,8 @@ public class ServicoService {
         return servicoRepository.save(servicoExistente);
     }
         
+    
+
     public void deletarServico(Integer id){
         if (!servicoRepository.existsById(id)){
             throw new RuntimeException("Serviço com o id: " +id+ " não encontrado");
