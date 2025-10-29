@@ -28,7 +28,7 @@ public class ClienteController {
     public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente){
         Cliente novoCliente = clienteService.cadastrarCliente(cliente);
 
-        return new ResponseEntity<>(novoCliente,HttpStatus.CREATED);
+        return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -51,7 +51,7 @@ public class ClienteController {
             Cliente clienteAtualizado = clienteService.atualizaCliente(id, detalheCliente);
             return new ResponseEntity<>(clienteAtualizado, HttpStatus.OK); 
         } catch (RuntimeException a){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); //se o serviço lançar a exceprion de serviço não encontrado, retorna Not Found 
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); //se o serviço lançar a exceprion de cliente não encontrado, retorna Not Found 
         }
     }
 
