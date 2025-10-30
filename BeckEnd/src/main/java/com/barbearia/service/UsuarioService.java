@@ -30,7 +30,7 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
-    public void excluirUsuario(Integer id){
+    public void deletarUsuario(Integer id){
         if(usuarioRepository.existsById(id)){
             usuarioRepository.deleteById(id);
         } else{

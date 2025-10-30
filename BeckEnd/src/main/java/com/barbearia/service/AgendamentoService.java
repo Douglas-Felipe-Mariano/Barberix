@@ -41,7 +41,7 @@ public class AgendamentoService {
                                         .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         //Valida se o barbeiro existe e está ativo
-        Barbeiro barbeiro = barbeiroService.buscarBarbeiroAtivosPorId(agendamento.getBarbeiro().getBarbeiroId())
+        Barbeiro barbeiro = barbeiroService.buscarBarbeiroAtivoPorId(agendamento.getBarbeiro().getBarbeiroId())
                                            .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado ou Inativo"));
 
         //Valida se o serviço existe 
@@ -90,7 +90,7 @@ public class AgendamentoService {
         //Valida se o barbeiro foi alterado
         Barbeiro barbeiroAtualizado = agendamentoExistente.getBarbeiro();
         if (detalheAgendamento.getBarbeiro() != null) {
-            barbeiroAtualizado = barbeiroService.buscarBarbeiroAtivosPorId(detalheAgendamento.getBarbeiro().getBarbeiroId())
+            barbeiroAtualizado = barbeiroService.buscarBarbeiroAtivoPorId(detalheAgendamento.getBarbeiro().getBarbeiroId())
                                                 .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado ou Inativo"));
         }
 

@@ -33,7 +33,7 @@ public class BarbeiroService {
         return barbeiroRepository.findByStatus(1);
     }
 
-    public Optional<Barbeiro> buscarBarbeiroAtivosPorId(Integer id){
+    public Optional<Barbeiro> buscarBarbeiroAtivoPorId(Integer id){
         return barbeiroRepository.findByBarbeiroIdAndStatus(id, 1);
     }
 
@@ -52,7 +52,7 @@ public class BarbeiroService {
         return barbeiroRepository.save(barbeiroExistente);
     }
 
-    public void inativarBarbeiro(Integer id){
+    public void deletarBarbeiro(Integer id){
         //Valida se o barbeiro existe
         if(!barbeiroRepository.existsById(id)){
             throw new RuntimeException("Barbeiro com o id " +id+ " não encontrado");
