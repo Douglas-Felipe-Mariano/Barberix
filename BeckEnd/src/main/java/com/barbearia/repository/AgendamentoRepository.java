@@ -12,7 +12,7 @@ import com.barbearia.model.Barbeiro;
 
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Integer> {
-    Optional<Agendamento> findByBarbeiroAndDataAgendamento(Barbeiro barbeiro, LocalDateTime dataAgendada);
+    Optional<Agendamento> findByBarbeiroAndDataAgendada(Barbeiro barbeiro, LocalDateTime dataAgendada);
 
     List<Agendamento> findAllByDataAgendada(LocalDateTime dataAgendada);
 }

@@ -43,7 +43,7 @@ public class AgendamentoService {
 
         //Valida se o barbeiro está disponivel no horario desejado                                        
         Optional<Agendamento> validaHorario = agendamentoRepository
-                                              .findByBarbeiroAndDataAgendamento(barbeiro, agendamento.getDataAgendada());
+                                              .findByBarbeiroAndDataAgendada(barbeiro, agendamento.getDataAgendada());
         
         if (validaHorario.isPresent()){
             throw new RuntimeException("Este barbeiro já possui um agendamento neste horario");
@@ -103,7 +103,7 @@ public class AgendamentoService {
         //Valida se o barbeiro ou a data foram alterados e checa se há conflito 
         if (detalheAgendamento.getBarbeiro() != null || detalheAgendamento.getDataAgendada() != null){
             Optional<Agendamento> conflitoHorario = agendamentoRepository
-                                                   .findByBarbeiroAndDataAgendamento(barbeiroAtualizado, dataAtualizada);
+                                                   .findByBarbeiroAndDataAgendada(barbeiroAtualizado, dataAtualizada);
             if (conflitoHorario.isPresent() && !conflitoHorario.get().getAgendamentoId().equals(id)){
                 throw new RuntimeException("Esse barbeiro já possui um agendamento neste horario");
             }
