@@ -1,7 +1,5 @@
 package com.barbearia.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +34,8 @@ public class UsuarioController {
     @GetMapping("/email/{email}")
     public ResponseEntity<Usuario> buscarUsuarioPorEmail(@PathVariable String email){
         return usuarioService.buscarUsuarioPorEmail(email)
-                                               .map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
-                                               .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                             .map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
+                             .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")

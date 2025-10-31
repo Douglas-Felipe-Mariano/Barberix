@@ -12,13 +12,6 @@ import com.barbearia.model.Barbeiro;
 import com.barbearia.model.Cliente;
 import com.barbearia.model.Servico;
 import com.barbearia.repository.AgendamentoRepository;
-import com.barbearia.repository.BarbeiroRepository;
-import com.barbearia.repository.ClienteRepository;
-import com.barbearia.repository.ServicoRepository;
-
-import com.barbearia.service.BarbeiroService;
-import com.barbearia.service.ClienteService;
-import com.barbearia.service.ServicoService;
 
 @Service
 public class AgendamentoService {
