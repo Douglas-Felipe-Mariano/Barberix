@@ -14,26 +14,27 @@ public class Perfil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PerfilId")
-    private Integer PerfilId;
+    private Integer perfilId;
 
     @Column(name = "PER_Nome", length = 30, nullable = false, unique = true)
-    private String NomePerfil;
+    private String nomePerfil;
 
     public Integer getPerfilId() {
-        return PerfilId;
+        return this.perfilId;
     }
 
     public void setPerfilId(Integer perfilId) {
-        PerfilId = perfilId;
+        this.perfilId = perfilId;
     }
 
     public String getNomePerfil() {
-        return NomePerfil;
+        return this.nomePerfil;
     }
 
     public void setNomePerfil(String nomePerfil) {
-        NomePerfil = nomePerfil;
+        this.nomePerfil = nomePerfil;
     }
+
 
     public Perfil() {
     }

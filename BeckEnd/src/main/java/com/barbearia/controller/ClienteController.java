@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,10 +26,14 @@ public class ClienteController {
     private ClienteService clienteService;
 
     @PostMapping
-    public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente){
-        Cliente novoCliente = clienteService.cadastrarCliente(cliente);
-
-        return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
+    public ResponseEntity<?> cadastrarCliente(@RequestBody Cliente cliente){
+        try{
+            Cliente novoCliente = clienteService.cadastrarCliente(cliente);
+            
+            return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
+        } catch (RuntimeException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping
