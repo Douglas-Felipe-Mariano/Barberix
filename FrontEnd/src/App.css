@@ -174,16 +174,15 @@ button[type="button"]:hover {
 
 /* Esta classe aplica o deslocamento no conteúdo */
 .page-content-with-menu {
-    /* Desloca o conteúdo para o lado do menu (250px) */
-    margin-left: var(--menu-lateral-width); 
+    /* Desloca o conteúdo para o lado do menu */
+    margin-left: 250px;
     
-    /* 🚨 ADICIONA PADDING NO TOPO e LADOS para afastar o conteúdo */
-    padding: 20px; 
+    /* Padding removido - cada página gerencia seu próprio padding */
+    padding: 0; 
     
     /* Garante que o padding não cause barra de rolagem horizontal desnecessária */
     box-sizing: border-box; 
     
-    /* Garante que o conteúdo ocupe o espaço restante */
-    width: calc(100% - var(--menu-lateral-width)); 
+    /* Remove width fixo para evitar scroll horizontal */
     min-height: 100vh;
 }

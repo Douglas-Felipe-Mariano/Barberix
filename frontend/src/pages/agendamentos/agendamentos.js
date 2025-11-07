@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './agendamentos.css';
 
-import MenuLateral from '../menuLateral/menuLateral';
-
 // URLs das APIs
 const API_URL_AGENDAMENTOS = 'http://localhost:8080/api/agendamentos';
 const API_URL_CLIENTES = 'http://localhost:8080/api/clientes';

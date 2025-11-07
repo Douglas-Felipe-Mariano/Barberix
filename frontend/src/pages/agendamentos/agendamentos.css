@@ -17,22 +17,11 @@
 }
 
 /* ========== LAYOUT GERAL ========== */
-.app-layout-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: var(--color-background-main);
-  color: var(--color-text-primary);
-}
-
-.page-content-with-menu {
-  flex: 1;
-  margin-left: 250px;
-  padding: 30px;
-  transition: margin-left 0.3s ease;
-}
-
 .agendamentos-container {
-  max-width: 1400px;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 15px;
+  box-sizing: border-box;
   margin: 0 auto;
 }
 

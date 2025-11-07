@@ -58,9 +58,11 @@ function MenuLateral() {
                 </Link>
             </nav>
 
-            <button onClick={handleLogout} className="logout-button">
-                Sair
-            </button>
+            <div className="logout-container">
+                <button onClick={handleLogout} className="logout-button">
+                    <span className="icon">🚪</span> Sair
+                </button>
+            </div>
         </div>
     );
 }
