@@ -4,7 +4,7 @@ CREATE TABLE TB_CLIENTE (ClienteId         INT             IDENTITY PRIMARY KEY
 						,CLI_NOME          VARCHAR(100)    NOT NULL
 						,CLI_Telefone      VARCHAR(16)     NOT NULL
 						,CLI_Email		   VARCHAR(100)    NOT NULL		UNIQUE
-						,CLI_DataCadastro  DATETIME2    NOT NULL        DEFAULT GETDATE()
+						,CLI_DataCadastro  DATETIME2       NOT NULL     DEFAULT GETDATE()
 						,CLI_Endereco      VARCHAR(255)    NULL);
 
 CREATE TABLE TB_PERFIL (PerfilId	INT IDENTITY PRIMARY KEY 

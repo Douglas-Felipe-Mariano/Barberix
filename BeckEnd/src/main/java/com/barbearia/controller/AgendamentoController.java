@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barbearia.model.Agendamento;
 import com.barbearia.service.AgendamentoService;
 
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
 @RequestMapping("/api/agendamentos")
 public class AgendamentoController {
