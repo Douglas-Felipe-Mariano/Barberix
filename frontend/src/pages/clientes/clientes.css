@@ -1,0 +1,134 @@
+/* src/pages/clientes/Clientes.css (Finalizado para Dark Mode Total) */
+
+/* 1. Container Principal (Mantido) */
+.clientes-container {
+    padding: 0px;
+    max-width: 100%;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    color: var(--color-text-primary); /* Garante que o texto principal seja claro */
+}
+
+/* 2. Estilo do Formulário (Container do CRUD) */
+.form-section {
+    background: var(--color-background-card) !important; /* Fundo do card em Dark Mode */
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid var(--color-border); 
+}
+
+/* Títulos H3 */
+.form-section h3 {
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+/* --- Container Flex para Inputs --- */
+.form-inputs-container {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px; 
+    margin-bottom: 10px;
+}
+
+/* Estilo para Inputs (Aplica a cor e fundo corretos) */
+.form-section input {
+    width: calc(33.33% - 15px); 
+    padding: 12px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    
+    /* Cores no Modo Escuro */
+    background-color: var(--color-background-input); 
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+/* Estilo para o campo Endereço, que deve ocupar uma linha inteira */
+.form-section input[name="CLI_Endereco"] {
+    width: calc(100% - 15px);
+    margin-top: 5px; 
+}
+
+/* Estilo para Botões */
+.form-section button {
+    padding: 12px 20px;
+    margin-right: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+.form-section button[type="submit"] {
+    background-color: var(--color-primary); 
+    color: var(--color-background-card); /* Texto do botão claro */
+}
+
+.form-section button[type="button"] { /* Botão Cancelar Edição */
+    background-color: var(--color-text-secondary); /* Cinza escuro */
+    color: var(--color-background-body); /* Texto do botão escuro */
+}
+
+/* --- Tabela (Lista de Clientes) --- */
+.table-section {
+    background: var(--color-background-card) !important;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); 
+}
+
+.table-section h3 {
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.table-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table-section th, .table-section td {
+    /* 🚨 Corrigido: Bordas e texto usam variáveis de Dark Mode */
+    border: 1px solid var(--color-border); 
+    color: var(--color-text-primary); 
+    padding: 12px;
+    text-align: left;
+}
+
+.table-section th {
+    /* Fundo do cabeçalho da tabela */
+    background-color: var(--color-background-input); 
+}
+
+/* Texto de "Nenhum cliente cadastrado" */
+.table-section p {
+    color: var(--color-text-secondary); 
+}
+
+/* Estilos dos botões de Ação na Tabela */
+.table-section td button {
+    margin-right: 5px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    font-size: 0.9em;
+}
+
+.table-section td button:first-child { /* Botão Editar */
+    background-color: var(--color-warning); /* Amarelo */
+    color: var(--color-background-card); 
+}
+
+.table-section td button:last-child { /* Botão Excluir */
+    background-color: var(--color-danger); /* Vermelho */
+    color: var(--color-background-card); 
+}

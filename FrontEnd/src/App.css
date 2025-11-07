@@ -1,0 +1,189 @@
+/* src/App.css ou index.css */
+
+/* --- DEFINIÇÃO ÚNICA DA RAIZ E VARIÁVEIS GLOBAIS --- */
+:root {
+  /* Largura do Menu Lateral */
+  --menu-lateral-width: 250px; 
+  
+  /* Cores Globais (Modo Escuro Fixo) */
+  --color-primary: #007bff;         
+  --color-text-primary: #e0e0e0;    
+  --color-text-secondary: #aaaaaa;  
+  --color-border: #444444;          
+  
+  /* Cores de Fundo */
+  --color-background-body: #1e1e1e; 
+  --color-background-card: #2d2d2d; 
+  --color-background-input: #383838;
+
+  /* Cores de Status e Ações */
+  --color-success: #38b44a;         
+  --color-danger: #e74c3c;          
+  --color-warning: #f1c40f;         
+}
+
+
+/* --- ESTILOS GLOBAIS BÁSICOS --- */
+body {
+  /* ZERA MARGENS GLOBAIS */
+  margin: 0; 
+  padding: 0; 
+  font-family: Arial, sans-serif;
+  
+  background-color: var(--color-background-body); 
+  color: var(--color-text-primary); 
+  
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+  font-size: 2.5em !important;
+  font-weight: 700 !important;
+  margin-bottom: 30px !important;
+  background: linear-gradient(135deg, var(--color-primary), #0056b3) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: slideUp 0.6s ease !important;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h3 {
+  border-bottom: 2px solid var(--color-primary) !important;
+  padding-bottom: 10px;
+}
+
+/* ========== ESTILOS GLOBAIS DE INPUTS ========== */
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 123, 191, 0.2) !important;
+}
+
+input,
+select,
+textarea {
+  transition: all 0.3s ease !important;
+}
+
+/* ========== ESTILOS GLOBAIS DE BOTÕES ========== */
+
+/* Botão Primário (Salvar, Agendar, Cadastrar, etc) */
+button[type="submit"],
+.btn-salvar,
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), #0056b3) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 1em !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(0, 123, 191, 0.3) !important;
+}
+
+button[type="submit"]:hover,
+.btn-salvar:hover,
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 123, 191, 0.5) !important;
+}
+
+/* Botão de Editar */
+.btn-editar {
+  background: linear-gradient(135deg, var(--color-primary), #0056b3) !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-size: 0.9em !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 123, 191, 0.3) !important;
+}
+
+.btn-editar:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 123, 191, 0.5) !important;
+}
+
+/* Botão de Excluir */
+.btn-excluir,
+.btn-sim {
+  background: linear-gradient(135deg, var(--color-danger), #e35d6a) !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-size: 0.9em !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+.btn-excluir:hover,
+.btn-sim:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5) !important;
+}
+
+/* Botão de Cancelar */
+.btn-cancelar,
+.btn-nao,
+button[type="button"] {
+  background: var(--color-background-input) !important;
+  color: var(--color-text-primary) !important;
+  border: 2px solid var(--color-border) !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 1em !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-cancelar:hover,
+.btn-nao:hover,
+button[type="button"]:hover {
+  background: var(--color-border) !important;
+  transform: translateY(-2px) !important;
+}
+
+#root {
+    min-height: 100vh; 
+}
+
+/* --- SOLUÇÃO DE LAYOUT PARA O MENU LATERAL --- */
+
+/* Esta classe aplica o deslocamento no conteúdo */
+.page-content-with-menu {
+    /* Desloca o conteúdo para o lado do menu (250px) */
+    margin-left: var(--menu-lateral-width); 
+    
+    /* 🚨 ADICIONA PADDING NO TOPO e LADOS para afastar o conteúdo */
+    padding: 20px; 
+    
+    /* Garante que o padding não cause barra de rolagem horizontal desnecessária */
+    box-sizing: border-box; 
+    
+    /* Garante que o conteúdo ocupe o espaço restante */
+    width: calc(100% - var(--menu-lateral-width)); 
+    min-height: 100vh;
+}

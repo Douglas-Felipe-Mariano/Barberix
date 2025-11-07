@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barbearia.model.Perfil;
 import com.barbearia.service.PerfilService;
 
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
 @RequestMapping("/api/perfis")
 public class PerfilController {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barbearia.model.Cliente;
 import com.barbearia.service.ClienteService;
 
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
