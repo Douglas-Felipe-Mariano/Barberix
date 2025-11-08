@@ -1,0 +1,436 @@
+/* Fila de Atendimentos - Container Principal */
+.fila-container {
+    padding: 20px 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: transparent;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.fila-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 123, 191, 0.1);
+}
+
+.fila-header h1 {
+    color: #eee;
+    margin-bottom: 5px;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fila-data {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    text-transform: capitalize;
+}
+
+/* Estatísticas */
+.fila-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 123, 191, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #333333;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 123, 191, 0.2);
+    border-color: #00d9ff;
+}
+
+.stat-card.pendentes {
+    border-color: #e94560;
+}
+
+.stat-card.concluidos {
+    border-color: #00d9ff;
+}
+
+.stat-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #a0a0a0;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #00d9ff;
+}
+
+/* Filtro */
+.fila-filtro {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 123, 191, 0.1);
+    border: 1px solid #333333;
+}
+
+.fila-filtro label {
+    font-weight: 700;
+    color: #eee;
+    font-size: 1rem;
+}
+
+.fila-filtro select {
+    padding: 12px 20px;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #2a2a2a;
+    color: #eee;
+    flex: 1;
+    max-width: 300px;
+}
+
+.fila-filtro select:hover {
+    border-color: #007bff;
+    background: #2a2a2a;
+}
+
+.fila-filtro select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.fila-filtro select:disabled {
+    background-color: #2a2a2a;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.filtro-info {
+    color: #e94560;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Lista de Fila */
+.fila-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Item da Fila */
+.fila-item {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 123, 191, 0.1);
+    border: 1px solid #333333;
+    border-left: 4px solid #333333;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.fila-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: inherit;
+}
+
+.fila-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 30px rgba(0, 123, 191, 0.15);
+}
+
+/* Status Colors */
+.fila-item.concluido {
+    border-left-color: #5a5a5a;
+    opacity: 0.6;
+}
+
+.fila-item.atrasado {
+    border-left-color: #e94560;
+    background: #2a2424;
+}
+
+.fila-item.proximo {
+    border-left-color: #888;
+    background: #2a2a2a;
+}
+
+.fila-item.breve {
+    border-left-color: #666;
+    background: #2a2a2a;
+}
+
+.fila-item.aguardando {
+    border-left-color: #4a4a4a;
+    background: #2a2a2a;
+}
+
+/* Próximo Destaque */
+.fila-item.proximo-destaque {
+    border: 3px solid #888;
+    border-left-width: 6px;
+    box-shadow: 0 0 30px rgba(136, 136, 136, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(136, 136, 136, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(136, 136, 136, 0.4);
+        transform: scale(1.02);
+    }
+}
+
+/* Header do Item */
+.fila-item-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.fila-numero {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #a0a0a0;
+    min-width: 40px;
+}
+
+.fila-status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.fila-status-badge.concluido {
+    background: #5a5a5a;
+    color: white;
+}
+
+.fila-status-badge.atrasado {
+    background: #e94560;
+    color: white;
+}
+
+.fila-status-badge.proximo {
+    background: #888;
+    color: white;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.fila-status-badge.breve {
+    background: #666;
+    color: white;
+}
+
+.fila-status-badge.aguardando {
+    background: #4a4a4a;
+    color: white;
+}
+
+.fila-horario {
+    margin-left: auto;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #e94560;
+}
+
+/* Body do Item */
+.fila-item-body {
+    padding-left: 10px;
+}
+
+.fila-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #a0a0a0;
+    min-width: 100px;
+}
+
+.info-value {
+    color: #eee;
+}
+
+.info-value.valor {
+    color: #ddd;
+    font-weight: bold;
+}
+
+/* Alerta Próximo */
+.proximo-alert {
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #4a4a4a 0%, #5a5a5a 100%);
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    animation: slideIn 0.5s ease;
+    box-shadow: 0 4px 8px rgba(74, 74, 74, 0.3);
+    letter-spacing: 1px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estados Vazios */
+.fila-vazia {
+    text-align: center;
+    padding: 80px 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 123, 191, 0.1);
+    border: 1px solid #333333;
+}
+
+.fila-vazia .emoji {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.fila-vazia p {
+    color: #a0a0a0;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px;
+    color: #eee;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Botão Atualizar */
+.btn-atualizar {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 123, 191, 0.3);
+    letter-spacing: 0.5px;
+}
+
+.btn-atualizar:hover {
+    background: linear-gradient(135deg, #0056b3, #003d82);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 191, 0.4);
+}
+
+.btn-atualizar:active {
+    transform: translateY(-1px);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .fila-container {
+        padding: 15px;
+    }
+
+    .fila-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .fila-item-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fila-horario {
+        margin-left: 0;
+    }
+
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .info-label {
+        min-width: auto;
+    }
+}

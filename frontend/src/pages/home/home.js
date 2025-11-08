@@ -17,12 +17,17 @@ function Home() {
     const carregarDados = async () => {
         try {
             // Buscar agendamentos de hoje
-            const hoje = new Date().toISOString().split('T')[0];
-            const agendamentosRes = await axios.get(`http://localhost:8080/api/agendamentos/data/${hoje}`);
+            const hoje = new Date().toLocaleDateString('en-CA'); // Formato YYYY-MM-DD no timezone local
+            const dataHoraISO = `${hoje}T00:00:00`; // Adiciona hora para LocalDateTime
+            const agendamentosRes = await axios.get(`http://localhost:8080/api/agendamentos/data/${dataHoraISO}`, {
+                withCredentials: false
+            });
             const agendamentos = agendamentosRes.data;
             
             // Buscar barbeiros ativos
-            const barbeirosRes = await axios.get('http://localhost:8080/api/barbeiros');
+            const barbeirosRes = await axios.get('http://localhost:8080/api/barbeiros', {
+                withCredentials: false
+            });
             const barbeiros = barbeirosRes.data;
             
             // Calcular KPIs

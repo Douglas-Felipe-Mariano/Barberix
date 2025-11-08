@@ -2,38 +2,59 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import MenuLateral from '../pages/menuLateral/menuLateral';
 
 // Define a largura do menu lateral
 const MENU_WIDTH = '250px'; 
 
-// Este componente recebe o componente da página a ser renderizada (Element)
-const PrivateRoute = ({ element: Element, ...rest }) => {
-  
-  // 1. REGRA DE SEGURANÇA: Verifica se o token existe (Mock de autenticação)
-  // Em um sistema real, você também verificaria a validade do token.
-  const isAuthenticated = localStorage.getItem('authToken');
+/**
+ * Componente que protege rotas com autenticação e autorização
+ * @param {Component} element - Componente da página a ser renderizada
+ * @param {Array} allowedProfiles - Lista de perfis permitidos (ex: ['ADMIN', 'GERENTE'])
+ */
+const PrivateRoute = ({ element: Element, allowedProfiles = [], ...rest }) => {
+  const { isAuthenticated, hasPermission, loading } = useAuth();
 
-  // Se NÃO estiver autenticado, redireciona para o Login ('/' é a rota de Login)
+  // Aguarda o carregamento do contexto
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  // 1. Verifica se está autenticado
   if (!isAuthenticated) {
-    // Usamos 'replace' para evitar que o usuário volte para a rota restrita com o botão Voltar
     return <Navigate to="/" replace />; 
   }
 
-  // 2. LAYOUT: Se estiver autenticado, renderiza o Menu e o Conteúdo da Página
+  // 2. Verifica se tem permissão para acessar esta rota
+  if (!hasPermission(allowedProfiles)) {
+    // Redireciona para uma página de acesso negado ou volta para home
+    return (
+      <div style={{ minHeight: '100vh' }}>
+        <MenuLateral />
+        <div style={{ 
+          marginLeft: '250px',
+          padding: '40px',
+          textAlign: 'center'
+        }}>
+          <h2>🚫 Acesso Negado</h2>
+          <p>Você não tem permissão para acessar esta página.</p>
+          <p>Entre em contato com o administrador do sistema.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Se estiver autenticado e autorizado, renderiza o Menu e o Conteúdo
   return (
     <div style={{ minHeight: '100vh' }}>
-      
-      {/* O MENU É RENDERIZADO UMA ÚNICA VEZ AQUI */}
       <MenuLateral /> 
-      
-      {/* O CONTEÚDO DA TELA */}
       <div style={{ 
         marginLeft: '250px',
         padding: '0',
         boxSizing: 'border-box'
       }}>
-        <Element {...rest} /> {/* Renderiza a página (Home, Clientes, etc.) */}
+        <Element {...rest} />
       </div>
     </div>
   );

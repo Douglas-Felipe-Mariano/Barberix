@@ -24,6 +24,45 @@
     margin: 0 20px;
 }
 
+/* Informações do usuário logado */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 20px;
+    margin: 10px 20px;
+    background-color: rgba(0, 123, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid var(--color-primary);
+    gap: 4px;
+}
+
+.user-info small {
+    color: var(--color-text-secondary);
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-info strong {
+    color: var(--color-text-primary);
+    font-size: 0.9em;
+    word-break: break-word;
+}
+
+.user-info .user-role {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 0.75em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
 /* Seção de Links */
 .menu-links {
     flex-grow: 1; 

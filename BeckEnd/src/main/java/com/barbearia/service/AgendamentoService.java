@@ -65,7 +65,7 @@ public class AgendamentoService {
     }
 
     public List<Agendamento> buscarAgendamentoPorData(LocalDateTime dataAgendamento){
-        return agendamentoRepository.findAllByDataAgendada(dataAgendamento);
+        return agendamentoRepository.findAllByDate(dataAgendamento);
     }
 
     public Agendamento atualizarAgendamento(Integer id, Agendamento detalheAgendamento){

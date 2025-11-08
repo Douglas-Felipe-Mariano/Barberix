@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './login.css';
 
 // URL da API de autenticação
@@ -16,6 +17,7 @@ function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -31,7 +33,6 @@ function Login() {
 
     console.log('=== TENTATIVA DE LOGIN ===');
     console.log('Email:', formData.email);
-    console.log('Senha:', formData.senha);
 
     try {
       // Envia email e senha para o endpoint de login
@@ -42,18 +43,18 @@ function Login() {
 
       console.log('Resposta do backend:', response.data);
 
-      // Armazena informações do usuário no localStorage
+      // Armazena informações do usuário usando o AuthContext
       const userData = {
         usuarioId: response.data.usuarioId,
         email: response.data.email,
         perfil: response.data.perfil
       };
       
-      console.log('Salvando no localStorage:', userData);
-      localStorage.setItem('usuario', JSON.stringify(userData));
+      console.log('Login realizado com sucesso:', userData);
+      console.log('Perfil do usuário:', userData.perfil?.nomePerfil || userData.perfil);
       
-      // Salva token de autenticação (necessário para o PrivateRoute)
-      localStorage.setItem('authToken', 'authenticated');
+      // Usa a função login do contexto
+      login(userData);
       
       console.log('Redirecionando para /home...');
       // Redireciona para a home

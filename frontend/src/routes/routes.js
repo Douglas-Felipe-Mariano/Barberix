@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext';
 
 import PrivateRoute from './privateRoutes';
 import Clientes from '../pages/clientes/clientes';
@@ -11,21 +12,84 @@ import Agendamentos from '../pages/agendamentos/agendamentos';
 import Perfis from '../pages/perfil/perfil';
 import MenuLateral from '../pages/menuLateral/menuLateral';
 import Usuario from '../pages/usuario/usuario';
+import Fila from '../pages/fila/fila';
+
+/**
+ * Configuração de Permissões por Perfil:
+ * - ADMIN: Acesso total ao sistema
+ * - GERENTE: Acesso a gestão (clientes, barbeiros, serviços, agendamentos)
+ * - ATENDENTE: Acesso a agendamentos e clientes
+ * - BARBEIRO: Acesso apenas a visualização de agendamentos
+ */
 
 function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/clientes" element={<PrivateRoute element={Clientes} />} />        
-        <Route path="/home" element={<PrivateRoute element={Home} />}/>
-        <Route path="/servicos" element={<PrivateRoute element={Servicos} />} />
-        <Route path="/barbeiros" element={<PrivateRoute element={Barbeiros} />} />
-        <Route path="/agendamentos" element={<PrivateRoute element={Agendamentos} />} />
-        <Route path="/perfis" element={<PrivateRoute element={Perfis} />} />
-        <Route path="/usuario" element={<PrivateRoute element={Usuario} />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          
+          {/* Rotas acessíveis a todos os usuários autenticados */}
+          <Route path="/home" element={<PrivateRoute element={Home} />}/>
+          
+          {/* Fila de Atendimentos: Todos podem ver */}
+          <Route path="/fila" element={
+            <PrivateRoute 
+              element={Fila} 
+              allowedProfiles={['ADMIN', 'GERENTE', 'ATENDENTE', 'BARBEIRO']} 
+            />
+          } />
+          
+          {/* Agendamentos: Todos podem ver, mas com funcionalidades diferentes */}
+          <Route path="/agendamentos" element={
+            <PrivateRoute 
+              element={Agendamentos} 
+              allowedProfiles={['ADMIN', 'GERENTE', 'ATENDENTE', 'BARBEIRO']} 
+            />
+          } />
+          
+          {/* Clientes: ADMIN, GERENTE e ATENDENTE */}
+          <Route path="/clientes" element={
+            <PrivateRoute 
+              element={Clientes} 
+              allowedProfiles={['ADMIN', 'GERENTE', 'ATENDENTE']} 
+            />
+          } />
+          
+          {/* Barbeiros: Apenas ADMIN e GERENTE */}
+          <Route path="/barbeiros" element={
+            <PrivateRoute 
+              element={Barbeiros} 
+              allowedProfiles={['ADMIN', 'GERENTE']} 
+            />
+          } />
+          
+          {/* Serviços: Apenas ADMIN e GERENTE */}
+          <Route path="/servicos" element={
+            <PrivateRoute 
+              element={Servicos} 
+              allowedProfiles={['ADMIN', 'GERENTE']} 
+            />
+          } />
+          
+          {/* Usuários: Apenas ADMIN */}
+          <Route path="/usuario" element={
+            <PrivateRoute 
+              element={Usuario} 
+              allowedProfiles={['ADMIN']} 
+            />
+          } />
+          
+          {/* Perfis: Apenas ADMIN */}
+          <Route path="/perfis" element={
+            <PrivateRoute 
+              element={Perfis} 
+              allowedProfiles={['ADMIN']} 
+            />
+          } />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
