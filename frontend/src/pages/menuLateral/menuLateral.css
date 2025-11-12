@@ -1,7 +1,7 @@
 .menu-lateral-container {
     /* Fundo ligeiramente mais escuro que o body, para diferenciar */
     background-color: #1a1a1a; 
-    width: 250px; 
+    width: var(--menu-lateral-width);
     height: 100vh; 
     position: fixed; 
     top: 0;

@@ -1,0 +1,45 @@
+/* Modal de detalhes do pagamento */
+.payment-details-overlay {
+  position: fixed;
+  left: 0; /* cobrir toda a viewport para centralizar o modal */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+/* Pequena proteção para que o modal não fique totalmente sob o menu lateral em telas pequenas */
+.payment-details-modal {
+  width: 680px;
+  max-width: calc(100% - 80px);
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  padding: 18px;
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  margin-left: 0; /* garante centralização */
+}
+
+.payment-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-details-body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row { color: var(--color-text-primary); }
+
+.comprovante-preview img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
+.comprovante-actions { display: flex; gap: 8px; margin-top: 8px; }
+.payment-details-actions { display:flex; gap:8px; justify-content: flex-end; margin-top:12px; }
+.modal-close { background: transparent; border: none; font-size: 1.4rem; color: var(--color-text-primary); cursor: pointer; }

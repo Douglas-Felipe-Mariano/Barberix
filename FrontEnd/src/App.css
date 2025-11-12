@@ -3,7 +3,7 @@
 /* --- DEFINIÇÃO ÚNICA DA RAIZ E VARIÁVEIS GLOBAIS --- */
 :root {
   /* Largura do Menu Lateral */
-  --menu-lateral-width: 250px; 
+  --menu-lateral-width: 350px; 
   
   /* Cores Globais (Modo Escuro Fixo) */
   --color-primary: #007bff;         
@@ -175,7 +175,7 @@ button[type="button"]:hover {
 /* Esta classe aplica o deslocamento no conteúdo */
 .page-content-with-menu {
     /* Desloca o conteúdo para o lado do menu */
-    margin-left: 250px;
+    margin-left: var(--menu-lateral-width);
     
     /* Padding removido - cada página gerencia seu próprio padding */
     padding: 0; 
@@ -185,4 +185,56 @@ button[type="button"]:hover {
     
     /* Remove width fixo para evitar scroll horizontal */
     min-height: 100vh;
+}
+
+/* Responsivo: esconde deslocamento em telas pequenas */
+@media (max-width: 768px) {
+  .page-content-with-menu {
+    margin-left: 0;
+  }
+}
+
+/* Padronização dos containers de páginas internos para evitar margens discrepantes */
+.page-content-with-menu > .pagamentos-container,
+.page-content-with-menu > .agendamentos-container,
+.page-content-with-menu > .home-container,
+.page-content-with-menu > .clientes-container,
+.page-content-with-menu > .cliente-container,
+.page-content-with-menu > .usuario-container,
+.page-content-with-menu > .usuarios-container,
+.page-content-with-menu > .servicos-container,
+.page-content-with-menu > .servico-container,
+.page-content-with-menu > .barbeiro-container,
+.page-content-with-menu > .barbeiros-container,
+.page-content-with-menu > .fila-container,
+.page-content-with-menu > .perfil-container,
+.page-content-with-menu > .perfis-container,
+.page-content-with-menu > .menu-lateral-container {
+  padding: 24px 20px;
+  max-width: none;
+  margin: 0;
+  width: auto;
+  box-sizing: border-box;
+}
+
+/* Em telas muito grandes, limitar largura para conforto visual */
+@media (min-width: 1400px) {
+  .page-content-with-menu > .pagamentos-container,
+  .page-content-with-menu > .agendamentos-container,
+  .page-content-with-menu > .home-container,
+  .page-content-with-menu > .clientes-container,
+  .page-content-with-menu > .cliente-container,
+  .page-content-with-menu > .usuario-container,
+  .page-content-with-menu > .usuarios-container,
+  .page-content-with-menu > .servicos-container,
+  .page-content-with-menu > .servico-container,
+  .page-content-with-menu > .barbeiro-container,
+  .page-content-with-menu > .barbeiros-container,
+  .page-content-with-menu > .fila-container,
+  .page-content-with-menu > .perfil-container,
+  .page-content-with-menu > .perfis-container,
+  .page-content-with-menu > .menu-lateral-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 }

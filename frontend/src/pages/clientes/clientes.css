@@ -133,3 +133,93 @@
     background-color: var(--color-danger); /* Vermelho */
     color: var(--color-background-card); 
 }
+
+/* Estilos aprimorados para Modais (usados em Clientes e outros) */
+.modal-overlay {
+  position: fixed;
+  left: var(--menu-lateral-width);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  width: 820px;
+  max-width: calc(100% - 96px);
+  background: linear-gradient(180deg, var(--color-background-card), rgba(0,0,0,0.02));
+  border: 1px solid var(--color-border);
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  color: var(--color-text-primary);
+  animation: modalPop 0.18s ease-out;
+}
+
+@keyframes modalPop {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.modal-header h3 { margin: 0; font-size: 1.25rem; }
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  max-height: calc(80vh - 160px);
+  overflow: auto;
+  padding-top: 6px;
+}
+
+.modal-footer {
+  display:flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Versão específica para modal de confirmação (visual distinto) */
+.modal-content.modal-confirmacao {
+  width: 520px;
+  padding: 18px;
+  border-radius: 10px;
+}
+
+.modal-header-confirmacao {
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.modal-header-confirmacao .icone-alerta { font-size: 1.6rem; }
+
+.modal-body-confirmacao { padding-top: 10px; }
+
+.modal-footer-confirmacao { display:flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* Pequenas melhorias para tabela/modal interno de pagamentos */
+.modal-content .payment-list { max-height: 55vh; overflow:auto; padding-right: 6px; }
+
+@media (max-width: 900px) {
+  .modal-content { width: calc(100% - 48px); max-width: calc(100% - 48px); }
+  .modal-content.modal-confirmacao { width: calc(100% - 48px); }
+}

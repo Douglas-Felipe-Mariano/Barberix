@@ -1,0 +1,26 @@
+.payment-card { 
+    background: var(--color-background-card); 
+    border: 1px solid var(--color-border); 
+    padding: 12px; 
+    border-radius: 8px; 
+    margin-bottom: 10px; 
+}
+.empty-list { 
+    text-align: center; 
+    padding: 30px; 
+    color: var(--color-text-secondary); 
+}
+.payment-item.editing {
+  border: 2px solid rgba(0, 123, 191, 0.9);
+  box-shadow: 0 6px 18px rgba(0, 123, 191, 0.25);
+  animation: editingHighlight 1.2s ease-in-out;
+}
+
+@keyframes editingHighlight {
+  0% { transform: translateY(-4px); }
+  50% { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+
+/* suaviza a rolagem */
+.payment-list { scroll-behavior: smooth; }
