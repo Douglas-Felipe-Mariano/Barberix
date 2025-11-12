@@ -7,6 +7,8 @@ import org.hibernate.annotations.SQLDelete;
 
 import com.barbearia.model.enums.PerfilTipo;
 
+import com.barbearia.model.enums.PerfilTipo;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
