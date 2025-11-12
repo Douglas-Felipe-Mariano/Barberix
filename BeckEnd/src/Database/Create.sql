@@ -7,8 +7,9 @@ CREATE TABLE TB_CLIENTE (ClienteId         INT             IDENTITY PRIMARY KEY
 						,CLI_DataCadastro  DATETIME2       NOT NULL     DEFAULT GETDATE()
 						,CLI_Endereco      VARCHAR(255)    NULL);
 
-CREATE TABLE TB_PERFIL (PerfilId	INT IDENTITY PRIMARY KEY 
-					   ,PER_Nome	VARCHAR(30) NOT NULL UNIQUE );
+-- Deletado com a implementação do Enum no backend
+-- CREATE TABLE TB_PERFIL (PerfilId	INT IDENTITY PRIMARY KEY   
+-- 					   ,PER_Nome	VARCHAR(30) NOT NULL UNIQUE );
 
 CREATE TABLE TB_USUARIO (UsuarioId         INT              IDENTITY PRIMARY KEY    
 						,PerfilId	       INT				NOT NULL

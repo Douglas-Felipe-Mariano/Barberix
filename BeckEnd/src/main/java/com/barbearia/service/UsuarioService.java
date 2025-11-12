@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.barbearia.excpetion.BusinesRuleException;
+import com.barbearia.excpetion.ResourceNotFoundException;
 import com.barbearia.model.Usuario;
 import com.barbearia.repository.UsuarioRepository;
 
@@ -20,6 +23,12 @@ public class UsuarioService {
 
 
     public Usuario criaUsuario(Usuario usuario){
+
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(usuario.getEmail());
+        if (usuarioExistente.isPresent()){
+            throw new BusinesRuleException("Um usuario com este email já existe.");
+        }
+
         String senhaPura = usuario.getSenha(); // senhaPura recebe a senha informada pelo usuario
         String senhaHash = passwordEncoder.encode(senhaPura); //criptografa a senha a partir do método global passord encoder
         usuario.setSenha(senhaHash); // seta a senha do usuario para o Hash criado
@@ -37,9 +46,18 @@ public class UsuarioService {
 
     public Usuario atualizarUsuario(Integer id, Usuario usuarioAtualizado){
         return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setPerfil(usuarioAtualizado.getPerfil());
-            usuario.setEmail(usuarioAtualizado.getEmail());
-            usuario.setStatus(usuarioAtualizado.getStatus());
+            if (usuarioAtualizado.getEmail() != null){
+                //Verifica se o email ja está em uso
+                Optional<Usuario> emailExistente = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
+                if(emailExistente.isPresent() && !emailExistente.get().getUsuarioId().equals(id)){
+                    throw new BusinesRuleException("Este e-mail já está em uso por outro usuário.");
+                }
+                usuario.setEmail(usuarioAtualizado.getEmail());
+            }
+            
+            if (usuarioAtualizado.getPerfil() != null){
+                usuario.setPerfil(usuarioAtualizado.getPerfil());
+            }
             
             // Só atualiza a senha se uma nova foi fornecida
             if(usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isEmpty()){
@@ -48,14 +66,14 @@ public class UsuarioService {
             }
             
             return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
+        }).orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado"));
     }
 
     public void deletarUsuario(Integer id){
         if(usuarioRepository.existsById(id)){
             usuarioRepository.deleteById(id);
         } else{
-            throw new RuntimeException("Usuario não encontrado");
+            throw new ResourceNotFoundException("Usuario não encontrado");
         }
     }
 }

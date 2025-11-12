@@ -6,13 +6,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.barbearia.model.enums.PerfilTipo;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @SQLDelete(sql = "UPDATE TB_USUARIO SET USU_Status = 0 WHERE UsuarioId = ? ")
@@ -28,9 +30,9 @@ public class Usuario {
     @Column(name = "USU_Status", nullable = false)
     private Integer status = 1; // Já inicia como 1 Ativo
 
-    @ManyToOne  
-    @JoinColumn(name = "PerfilId", nullable = false)
-    private Perfil perfil;
+    @Enumerated(EnumType.STRING)  
+    @Column(name = "USU_Perfil", nullable = false)
+    private PerfilTipo perfil;
 
     @Column(name = "USU_Email", length = 100, nullable = false, unique = true)
     private String email;
@@ -52,11 +54,11 @@ public class Usuario {
         this.usuarioId = usuarioId;
     }
 
-    public Perfil getPerfil() {
+    public PerfilTipo getPerfil() {
         return this.perfil;
     }
 
-    public void setPerfil(Perfil perfil) {
+    public void setPerfil(PerfilTipo perfil) {
         this.perfil = perfil;
     }
 
