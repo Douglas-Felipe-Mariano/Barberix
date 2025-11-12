@@ -205,18 +205,8 @@
     border: 3px solid #888;
     border-left-width: 6px;
     box-shadow: 0 0 30px rgba(136, 136, 136, 0.3);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 30px rgba(136, 136, 136, 0.3);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 40px rgba(136, 136, 136, 0.4);
-        transform: scale(1.02);
-    }
+    /* Removida animação de pulso para evitar efeito pulsante */
+    animation: none !important;
 }
 
 /* Header do Item */

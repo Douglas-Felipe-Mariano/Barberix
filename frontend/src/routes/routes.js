@@ -13,6 +13,8 @@ import Perfis from '../pages/perfil/perfil';
 import MenuLateral from '../pages/menuLateral/menuLateral';
 import Usuario from '../pages/usuario/usuario';
 import Fila from '../pages/fila/fila';
+import Pagamentos from '../pages/pagamentos/pagamentos';
+import ClientePagamentos from '../pages/pagamentos/clientePagamentos';
 
 /**
  * Configuração de Permissões por Perfil:
@@ -85,6 +87,20 @@ function AppRoutes() {
             <PrivateRoute 
               element={Perfis} 
               allowedProfiles={['ADMIN']} 
+            />
+          } />
+
+          {/* Pagamentos: ADMIN, GERENTE, ATENDENTE */}
+          <Route path="/pagamentos" element={
+            <PrivateRoute 
+              element={Pagamentos} 
+              allowedProfiles={['ADMIN', 'GERENTE', 'ATENDENTE']} 
+            />
+          } />
+          <Route path="/pagamentos/cliente/:id" element={
+            <PrivateRoute 
+              element={ClientePagamentos} 
+              allowedProfiles={['ADMIN', 'GERENTE', 'ATENDENTE']} 
             />
           } />
         </Routes>

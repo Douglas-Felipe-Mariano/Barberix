@@ -1,13 +1,13 @@
 // src/pages/Login.js
 
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './login.css';
 
 // URL da API de autenticação
-const API_URL_LOGIN = 'http://localhost:8080/api/auth/login'; 
+const API_URL_LOGIN = '/auth/login'; 
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -64,11 +64,9 @@ function Login() {
       console.error("Erro no login:", err);
       console.error("Resposta de erro:", err.response);
       
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError('Erro ao conectar com o servidor. Tente novamente.');
-      }
+      // Prefer normalized message from interceptor or fallback to known fields
+      const msg = err.normalizedMessage || err.response?.data?.message || 'Erro ao conectar com o servidor. Tente novamente.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

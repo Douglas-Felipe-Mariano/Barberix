@@ -1,0 +1,50 @@
+.payment-form-overlay {
+  position: fixed;
+  top: 0;
+  left: var(--menu-lateral-width);
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.payment-form {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.payment-form h3 {
+  margin-top: 0;
+}
+
+.payment-form label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.payment-form input,
+.payment-form select,
+.payment-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-input);
+  color: var(--color-text-primary);
+}
+
+.payment-form .payment-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}

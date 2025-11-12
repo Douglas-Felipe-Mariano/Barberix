@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; 
+import axios from '../../services/api'; 
 import './usuario.css';
 
 // URL base da API
@@ -98,7 +98,7 @@ function Usuario() {
       await fetchUsuarios();
     } catch (err) {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
-      setError(`Erro ao ${usuarioEditando ? 'editar' : 'cadastrar'} usuário.`);
+      setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${usuarioEditando ? 'editar' : 'cadastrar'} usuário.`);
     }
   };
   
@@ -127,7 +127,7 @@ function Usuario() {
       setUsuarioParaExcluir(null);
     } catch (err) {
       console.error("Erro ao deletar usuário:", err.response ? err.response.data : err.message);
-      setError("Erro ao deletar usuário.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Erro ao deletar usuário.");
     }
   };
 

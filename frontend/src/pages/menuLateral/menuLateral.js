@@ -92,6 +92,13 @@ function MenuLateral() {
                         <span className="icon">🛡️</span> Perfis
                     </Link>
                 )}
+
+                {/* Pagamentos - ADMIN, GERENTE, ATENDENTE */}
+                {canAccess(['ADMIN', 'GERENTE', 'ATENDENTE']) && (
+                    <Link to="/pagamentos" className={`menu-item ${location.pathname === '/pagamentos' ? 'active' : ''}`}>
+                        <span className="icon">💳</span> Pagamentos
+                    </Link>
+                )}
             </nav>
 
             <div className="logout-container">

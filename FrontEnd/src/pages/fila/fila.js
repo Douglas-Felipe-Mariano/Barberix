@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import './fila.css';
 
@@ -53,6 +53,7 @@ function Fila() {
             setBarbeiros(barbeirosRes.data);
         } catch (err) {
             console.error("Erro ao carregar fila:", err);
+            // no UI state atualmente; adicionar setError caso queira um alerta
         } finally {
             setLoading(false);
         }
