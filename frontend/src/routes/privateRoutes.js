@@ -5,9 +5,6 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import MenuLateral from '../pages/menuLateral/menuLateral';
 
-// Define a largura do menu lateral
-const MENU_WIDTH = '250px'; 
-
 /**
  * Componente que protege rotas com autenticação e autorização
  * @param {Component} element - Componente da página a ser renderizada
@@ -32,11 +29,7 @@ const PrivateRoute = ({ element: Element, allowedProfiles = [], ...rest }) => {
     return (
       <div style={{ minHeight: '100vh' }}>
         <MenuLateral />
-        <div style={{ 
-          marginLeft: '250px',
-          padding: '40px',
-          textAlign: 'center'
-        }}>
+        <div className="page-content-with-menu" style={{ padding: '40px', textAlign: 'center' }}>
           <h2>🚫 Acesso Negado</h2>
           <p>Você não tem permissão para acessar esta página.</p>
           <p>Entre em contato com o administrador do sistema.</p>
@@ -49,11 +42,7 @@ const PrivateRoute = ({ element: Element, allowedProfiles = [], ...rest }) => {
   return (
     <div style={{ minHeight: '100vh' }}>
       <MenuLateral /> 
-      <div style={{ 
-        marginLeft: '250px',
-        padding: '0',
-        boxSizing: 'border-box'
-      }}>
+      <div className="page-content-with-menu" style={{ padding: '0', boxSizing: 'border-box' }}>
         <Element {...rest} />
       </div>
     </div>

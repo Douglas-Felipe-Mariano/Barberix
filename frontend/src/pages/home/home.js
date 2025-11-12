@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import './home.css';
 
 function Home() {
@@ -9,6 +9,7 @@ function Home() {
         faturamento: 0,
         barbeiros: 0
     });
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         carregarDados();
@@ -43,12 +44,25 @@ function Home() {
             });
         } catch (err) {
             console.error("Erro ao carregar dados da home:", err);
+            setError(err.normalizedMessage || err.response?.data?.message || 'Não foi possível carregar os dados da home.');
         }
     };
 
     return (
         <div className="home-container">
             <h1>Visão Geral da Barbearia</h1>
+
+            {error && (
+              <div className="error-message-bar" style={{
+                backgroundColor: 'var(--color-danger)',
+                color: 'var(--color-background-card)',
+                padding: '10px',
+                borderRadius: '4px',
+                marginBottom: '15px'
+              }}>
+                {error}
+              </div>
+            )}
 
             {/* Cards de Indicadores */}
             <div className="content-section">

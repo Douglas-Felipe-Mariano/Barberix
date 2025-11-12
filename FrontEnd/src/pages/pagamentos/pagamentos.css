@@ -1,0 +1,128 @@
+/* Pagamentos - estilos básicos */
+.pagamentos-container {
+  /* Tornar full-width dentro do conteúdo deslocado pelo menu lateral */
+  padding: 24px 20px;
+  max-width: none;
+  margin: 0; /* remove centralização */
+  width: auto;
+  box-sizing: border-box;
+}
+
+/* Em telas muito grandes, limitar largura para conforto visual */
+@media (min-width: 1400px) {
+  .pagamentos-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+.pagamentos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.payment-card {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+/* Estilo aprimorado para o combobox de filtro dentro do header de Pagamentos */
+.pagamentos-header select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 10px 40px 10px 12px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-background-input), var(--color-background-card));
+  color: var(--color-text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ícone personalizado (seta) em SVG embutido */
+.pagamentos-header select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23e0e0e0' d='M7 10l5 5 5-5z'/></svg>");
+}
+
+.pagamentos-header select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 20px rgba(0,123,191,0.12);
+  transform: translateY(-1px);
+}
+
+/* Wrapper responsivo para alinhar controles no header */
+.pagamentos-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tornar o select menor em telas pequenas */
+@media (max-width: 600px) {
+  .pagamentos-header select { height: 36px; padding-right: 36px; }
+}
+
+/* Inputs de data/pesquisa no header devem seguir o mesmo padrão visual do select */
+.pagamentos-header input[type="date"],
+.pagamentos-header input[type="text"],
+.pagamentos-header input[type="number"],
+.pagamentos-header input[type="datetime-local"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 10px 40px 10px 12px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-background-input), var(--color-background-card));
+  color: var(--color-text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* ícone de calendário embutido (SVG simple) */
+.pagamentos-header input[type="date"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'><path fill='%23e0e0e0' d='M7 10h10v2H7zM19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5z'/></svg>");
+}
+
+/* Remover seta padrão em Firefox/Chrome se presente */
+.pagamentos-header input[type="date"]::-webkit-inner-spin-button,
+.pagamentos-header input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.pagamentos-header input[type="date"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 20px rgba(0,123,191,0.12);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .pagamentos-header input[type="date"], .pagamentos-header input[type="text"] { height: 36px; padding-right: 36px; }
+}

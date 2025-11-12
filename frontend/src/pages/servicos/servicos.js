@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import './servicos.css';
 
 // URL base da API
@@ -71,7 +71,7 @@ function Servicos() {
       await fetchServicos();
     } catch (err) {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
-      setError(`Erro ao ${servicoEditando ? 'editar' : 'cadastrar'} serviço.`);
+      setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${servicoEditando ? 'editar' : 'cadastrar'} serviço.`);
     }
   };
   
@@ -99,7 +99,7 @@ function Servicos() {
       setServicoParaExcluir(null);
     } catch (err) {
       console.error("Erro ao deletar serviço:", err.response ? err.response.data : err.message);
-      setError("Erro ao deletar serviço.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Erro ao deletar serviço.");
     }
   };
 

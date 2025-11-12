@@ -188,6 +188,27 @@ table td {
   font-size: 0.95em;
 }
 
+/* Garantir que os botões de Ações fiquem lado a lado e não quebrem para a próxima linha */
+.table-section tbody tr td:last-child {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap; /* evita quebra de palavras/elementos */
+}
+
+/* Em telas pequenas, permitir empilhar os botões para não quebrar a tabela */
+@media (max-width: 600px) {
+  .table-section tbody tr td:last-child {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .table-section tbody tr td:last-child button {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+}
+
 /* ========== STATUS TAGS ========== */
 .status-tag {
   display: inline-block;
@@ -221,6 +242,26 @@ table td {
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 123, 191, 0.3);
+}
+
+/* ========== BADGES DE STATUS ========== */
+.status-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+.status-paid {
+  background: var(--color-success);
+  color: #062b10;
+}
+
+.status-pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(255, 193, 7, 0.2);
 }
 
 /* ========== BOTÕES DE AÇÃO ========== */
@@ -262,7 +303,7 @@ table td {
 .modal-overlay {
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--menu-lateral-width);
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.75);

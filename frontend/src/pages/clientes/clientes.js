@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; 
+import axios from '../../services/api'; 
 import './clientes.css'; 
+import paymentsService from '../../services/payments';
+import PaymentList from '../../components/PaymentList';
 
 // URL base da sua API de Clientes
 const API_URL = 'http://localhost:8080/api/clientes'; 
@@ -19,6 +21,11 @@ function Clientes() {
   const [modalAberto, setModalAberto] = useState(false);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [clienteParaExcluir, setClienteParaExcluir] = useState(null); 
+  // Estado para modal de pagamentos por cliente
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+  const [paymentsForClient, setPaymentsForClient] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [paymentsClientSelected, setPaymentsClientSelected] = useState(null);
 
   // --- Implementação do FETCH (READ/GET) ---
   const fetchClientes = async () => {
@@ -27,10 +34,10 @@ function Clientes() {
     try {
         // 🚨 GET: Busca todos os clientes
         const response = await axios.get(API_URL);
-        setClientes(response.data); 
+        setClientes(response.data);
     } catch (err) {
         console.error("Erro ao buscar clientes:", err);
-        setError("Não foi possível carregar os dados dos clientes.");
+        setError(err.normalizedMessage || err.response?.data?.message || "Não foi possível carregar os dados dos clientes.");
     } finally {
         setLoading(false);
     }
@@ -39,6 +46,40 @@ function Clientes() {
   useEffect(() => {
       fetchClientes(); 
   }, []);
+
+  const openPaymentsModal = async (cliente) => {
+    setPaymentsClientSelected(cliente);
+    setShowPaymentsModal(true);
+    setPaymentsLoading(true);
+    try {
+      const list = await paymentsService.list();
+      setPaymentsForClient(list.filter(p => String(p.clienteId) === String(cliente.clienteId)));
+    } catch (err) {
+      console.error('Erro ao carregar pagamentos do cliente', err);
+      setPaymentsForClient([]);
+    } finally {
+      setPaymentsLoading(false);
+    }
+  };
+
+  const refreshPaymentsForClient = async () => {
+    if (!paymentsClientSelected) return;
+    setPaymentsLoading(true);
+    try {
+      const list = await paymentsService.list();
+      setPaymentsForClient(list.filter(p => String(p.clienteId) === String(paymentsClientSelected.clienteId)));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPaymentsLoading(false);
+    }
+  };
+
+  const closePaymentsModal = () => {
+    setShowPaymentsModal(false);
+    setPaymentsForClient([]);
+    setPaymentsClientSelected(null);
+  };
 
   // --- Implementação do handleChange, resetForm e handleEdit ---
   const handleChange = (e) => {
@@ -105,7 +146,7 @@ function Clientes() {
       await fetchClientes(); // Recarrega os dados
     } catch (err) {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
-      setError(`Erro ao ${clienteEditando ? 'editar' : 'cadastrar'} cliente.`);
+      setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${clienteEditando ? 'editar' : 'cadastrar'} cliente.`);
     }
   };
   
@@ -124,7 +165,7 @@ function Clientes() {
       setClienteParaExcluir(null);
     } catch (err) {
       console.error("Erro ao deletar cliente:", err.response ? err.response.data : err.message);
-      setError("Erro ao deletar cliente.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Erro ao deletar cliente.");
     }
   };
 
@@ -221,6 +262,7 @@ function Clientes() {
                             <td>
                               <button className="btn-editar" onClick={() => handleEdit(cliente)}>Editar</button>
                               <button className="btn-excluir" onClick={() => handleDelete(cliente.clienteId)}>Excluir</button>
+                              <button className="btn-cancelar" style={{marginLeft:8}} onClick={() => openPaymentsModal(cliente)}>Ver Pagamentos</button>
                             </td>
                           </tr>
                         ))}
@@ -330,6 +372,24 @@ function Clientes() {
                       <button type="button" className="btn-sim" onClick={confirmarExclusao}>
                         Sim, Excluir
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Modal: Pagamentos do Cliente (front-only) */}
+              {showPaymentsModal && paymentsClientSelected && (
+                <div className="modal-overlay" onClick={closePaymentsModal}>
+                  <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                      <h3>Pagamentos de {paymentsClientSelected.nome}</h3>
+                      <button className="modal-close" onClick={closePaymentsModal}>&times;</button>
+                    </div>
+                    <div className="modal-body">
+                      <PaymentList pagamentos={paymentsForClient} loading={paymentsLoading} onRefresh={refreshPaymentsForClient} />
+                    </div>
+                    <div className="modal-footer">
+                      <button className="btn-cancelar" onClick={closePaymentsModal}>Fechar</button>
                     </div>
                   </div>
                 </div>

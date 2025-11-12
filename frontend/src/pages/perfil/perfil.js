@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import './perfil.css';
 
 // URL base da API
@@ -63,7 +63,7 @@ function Perfis() {
       await fetchPerfis();
     } catch (err) {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
-      setError(`Erro ao ${perfilEditando ? 'editar' : 'cadastrar'} perfil.`);
+      setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${perfilEditando ? 'editar' : 'cadastrar'} perfil.`);
     }
   };
   
@@ -89,7 +89,7 @@ function Perfis() {
       setPerfilParaExcluir(null);
     } catch (err) {
       console.error("Erro ao deletar perfil:", err.response ? err.response.data : err.message);
-      setError("Erro ao deletar perfil.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Erro ao deletar perfil.");
     }
   };
 

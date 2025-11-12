@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../services/api';
 import './agendamentos.css';
+import PaymentForm from '../../components/PaymentForm';
+import paymentsService from '../../services/payments';
 
 // URLs das APIs
 const API_URL_AGENDAMENTOS = 'http://localhost:8080/api/agendamentos';
@@ -26,6 +28,9 @@ function Agendamentos() {
   const [agendamentoParaExcluir, setAgendamentoParaExcluir] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentAgendamento, setPaymentAgendamento] = useState(null);
+  const [paidSet, setPaidSet] = useState(new Set());
 
   // Buscar agendamentos
   const fetchAgendamentos = async () => {
@@ -36,7 +41,7 @@ function Agendamentos() {
       setAgendamentos(response.data);
     } catch (err) {
       console.error("Erro ao buscar agendamentos:", err);
-      setError("Não foi possível carregar os agendamentos.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Não foi possível carregar os agendamentos.");
     } finally {
       setLoading(false);
     }
@@ -61,6 +66,17 @@ function Agendamentos() {
   useEffect(() => {
     fetchDadosRelacionados();
     fetchAgendamentos();
+    // carrega pagamentos para marcar status
+    const loadPayments = async () => {
+      try {
+        const pagos = await paymentsService.list();
+        const ids = new Set(pagos.filter(p => p.agendamentoId).map(p => String(p.agendamentoId)));
+        setPaidSet(ids);
+      } catch (err) {
+        // ignore
+      }
+    };
+    loadPayments();
   }, []);
 
   const handleChange = (e) => {
@@ -111,7 +127,7 @@ function Agendamentos() {
       await fetchAgendamentos();
     } catch (err) {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
-      setError(`Erro ao ${agendamentoEditando ? 'editar' : 'cadastrar'} agendamento.`);
+      setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${agendamentoEditando ? 'editar' : 'cadastrar'} agendamento.`);
     }
   };
   
@@ -146,7 +162,7 @@ function Agendamentos() {
       setAgendamentoParaExcluir(null);
     } catch (err) {
       console.error("Erro ao deletar agendamento:", err.response ? err.response.data : err.message);
-      setError("Erro ao deletar agendamento.");
+      setError(err.normalizedMessage || err.response?.data?.message || "Erro ao deletar agendamento.");
     }
   };
 
@@ -155,6 +171,38 @@ function Agendamentos() {
     setAgendamentoParaExcluir(null);
   };
   
+  // Ações de pagamento
+  const openPaymentForm = (agendamento) => {
+    setPaymentAgendamento(agendamento);
+    setShowPaymentForm(true);
+  };
+  
+  const closePaymentForm = () => {
+    setPaymentAgendamento(null);
+    setShowPaymentForm(false);
+  };
+  
+  const handlePaymentSave = async (data) => {
+    try {
+      const payload = {
+        ...data,
+        agendamentoId: paymentAgendamento?.agendamentoId || data.agendamentoId,
+        clienteId: paymentAgendamento?.cliente?.clienteId || data.clienteId,
+      };
+      const created = await paymentsService.create(payload);
+      // atualizar conjunto de pagamentos pagos
+      if (created && created.agendamentoId) {
+        setPaidSet(prev => new Set(prev).add(String(created.agendamentoId)));
+      }
+      alert('Pagamento registrado com sucesso');
+      closePaymentForm();
+      await fetchAgendamentos();
+    } catch (err) {
+      console.error('Erro ao registrar pagamento:', err);
+      alert('Erro ao registrar pagamento');
+    }
+  };
+
   // Função auxiliar para formatar a data/hora para exibição
   const formatarDataHora = (isoString) => {
     if (!isoString) return 'N/A';
@@ -259,6 +307,7 @@ function Agendamentos() {
                     <th>Barbeiro</th>
                     <th>Serviço</th>
                     <th>Valor</th>
+                    <th>Status</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -272,8 +321,16 @@ function Agendamentos() {
                       <td>{agendamento.servico?.nome || 'N/A'}</td>
                       <td>R$ {parseFloat(agendamento.valor).toFixed(2)}</td>
                       <td>
+                        {paidSet.has(String(agendamento.agendamentoId)) ? (
+                          <span className="status-badge status-paid">PAGO</span>
+                        ) : (
+                          <span className="status-badge status-pending">PENDENTE</span>
+                        )}
+                      </td>
+                      <td>
                         <button className="btn-editar" onClick={() => handleEdit(agendamento)}>Editar</button>
                         <button className="btn-excluir" onClick={() => handleDelete(agendamento.agendamentoId)}>Excluir</button>
+                        <button className="btn-primary" style={{marginLeft: '8px'}} onClick={() => openPaymentForm(agendamento)}>Registrar Pagamento</button>
                       </td>
                     </tr>
                   ))}
@@ -384,6 +441,19 @@ function Agendamentos() {
               </div>
             </div>
           )}
+
+          {showPaymentForm && (
+            <PaymentForm
+              initial={{
+                agendamentoId: paymentAgendamento?.agendamentoId || '',
+                clienteId: paymentAgendamento?.cliente?.clienteId || '',
+                valor: paymentAgendamento?.valor || ''
+              }}
+              onCancel={closePaymentForm}
+              onSave={handlePaymentSave}
+            />
+          )}
+
         </div>
   );
 }   
