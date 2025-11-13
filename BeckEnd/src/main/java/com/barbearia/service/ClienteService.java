@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.barbearia.exception.BusinesRuleException;
+import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Cliente;
 import com.barbearia.repository.ClienteRepository;
 
@@ -20,7 +22,7 @@ public class ClienteService {
         
         //Verifica se o email ja existe no banco de dados   
         if (clienteExistenete.isPresent()){
-            throw new RuntimeException("E-mail já cadastrado no sistema");
+            throw new BusinesRuleException("E-mail já cadastrado no sistema");
         }
 
         return clienteRepository.save(cliente);
@@ -36,7 +38,7 @@ public class ClienteService {
 
     public Cliente atualizaCliente(Integer id ,Cliente detalheCliente){
         Cliente clienteExistente = clienteRepository.findById(id)
-                                                    .orElseThrow(() -> new RuntimeException("Cliente com o id: " + id + " não encontrado"));
+                                                    .orElseThrow(() -> new ResourceNotFoundException("Cliente com o id: " + id + " não encontrado"));
 
         if (detalheCliente.getNome() != null){
             clienteExistente.setNome(detalheCliente.getNome());         
@@ -45,7 +47,7 @@ public class ClienteService {
             //Valida se o email ja está em uso por outra pessoa
             Optional<Cliente> verificaEmail = clienteRepository.findByEmail(detalheCliente.getEmail());
             if (verificaEmail.isPresent() && !verificaEmail.get().getClienteId().equals(clienteExistente.getClienteId())){
-                throw new RuntimeException("E-mail já cadastrado no sistema");
+                throw new BusinesRuleException("E-mail já cadastrado no sistema");
             }
             clienteExistente.setEmail(detalheCliente.getEmail());
         }

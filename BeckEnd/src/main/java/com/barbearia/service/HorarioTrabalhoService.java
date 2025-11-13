@@ -3,13 +3,11 @@ package com.barbearia.service;
 import java.time.LocalTime;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.barbearia.excpetion.BusinesRuleException;
-import com.barbearia.excpetion.ResourceNotFoundException;
+import com.barbearia.exception.BusinesRuleException;
+import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Barbeiro;
 import com.barbearia.model.HorarioTrabalho;
 import com.barbearia.repository.HorarioTrabalhoRepository;
@@ -68,7 +66,9 @@ public class HorarioTrabalhoService {
             horarioExistente.setHoraFim(horaFim);
         }
 
-        horarioExistente.setAtivo(detalheHorario.isAtivo());
+        if (detalheHorario.getAtivo() != null) {
+            horarioExistente.setAtivo(detalheHorario.getAtivo());
+        }
 
         return horarioTrabalhoRepository.save(horarioExistente);
     }

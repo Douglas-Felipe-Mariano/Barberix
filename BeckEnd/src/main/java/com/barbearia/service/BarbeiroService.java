@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Barbeiro;
 import com.barbearia.repository.BarbeiroRepository;
 
@@ -43,7 +44,7 @@ public class BarbeiroService {
 
     public Barbeiro atualizaBarbeiro(Integer id, Barbeiro detalheBarbeiro){
         Barbeiro barbeiroExistente = barbeiroRepository.findById(id)
-                                                       .orElseThrow(() -> new RuntimeException("Barbeiro com o id " +id+ " não econtrado"));
+                                                       .orElseThrow(() -> new ResourceNotFoundException("Barbeiro com o id " +id+ " não econtrado"));
 
         if(detalheBarbeiro.getNome() != null){
             barbeiroExistente.setNome(detalheBarbeiro.getNome());
@@ -55,7 +56,7 @@ public class BarbeiroService {
     public void deletarBarbeiro(Integer id){
         //Valida se o barbeiro existe
         if(!barbeiroRepository.existsById(id)){
-            throw new RuntimeException("Barbeiro com o id " +id+ " não encontrado");
+            throw new ResourceNotFoundException("Barbeiro com o id " +id+ " não encontrado");
         }
         barbeiroRepository.deleteById(id);
     }

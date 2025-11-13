@@ -38,7 +38,7 @@ public class HorarioTrabalho {
     private LocalTime horaFim;
 
     @Column(name = "HT_Ativo", nullable = false)
-    private boolean ativo = true;
+    private Boolean ativo = true;
 
 
     public Integer getHorarioId() {
@@ -80,13 +80,14 @@ public class HorarioTrabalho {
     public void setHoraFim(LocalTime horaFim) {
         this.horaFim = horaFim;
     }
-
-    public boolean isAtivo() {
-        return this.ativo;
-    }
-
-    public void setAtivo(boolean ativo) {
+    
+    public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
     }
+
+    public Boolean getAtivo(){
+        return this.ativo;
+    }
+    
 
 }

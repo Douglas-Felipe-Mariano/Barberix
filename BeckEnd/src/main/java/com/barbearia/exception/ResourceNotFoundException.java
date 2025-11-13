@@ -1,4 +1,4 @@
-package com.barbearia.excpetion;
+package com.barbearia.exception;
 
 public class ResourceNotFoundException extends RuntimeException{
     public ResourceNotFoundException(String message){

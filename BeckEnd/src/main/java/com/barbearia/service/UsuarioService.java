@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.barbearia.excpetion.BusinesRuleException;
-import com.barbearia.excpetion.ResourceNotFoundException;
+import com.barbearia.exception.BusinesRuleException;
+import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Usuario;
 import com.barbearia.repository.UsuarioRepository;
 
