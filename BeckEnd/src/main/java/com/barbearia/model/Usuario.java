@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import com.barbearia.model.enums.PerfilTipo;
 
@@ -18,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @SQLDelete(sql = "UPDATE TB_USUARIO SET USU_Status = 0 WHERE UsuarioId = ? ")
-@Where(clause = "USU_Status = 1")
 @Entity
 @Table(name = "TB_USUARIO")
 public class Usuario {

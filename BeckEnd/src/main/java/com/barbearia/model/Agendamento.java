@@ -5,8 +5,13 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.barbearia.model.enums.StatusPagamento;
+import com.barbearia.model.enums.FormaPagamento;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,6 +50,17 @@ public class Agendamento {
 
     @Column(name = "AGEND_Valor", precision = 10, scale = 2, nullable = false)
     private BigDecimal valor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "AGEND_StatusPagamento", nullable = false, length = 10)
+    private StatusPagamento statusPagamento = StatusPagamento.PENDENTE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "AGEND_FormaPagamento" , nullable = true, length = 10)
+    private FormaPagamento formaPagamento;
+
+    @Column(name = "AGEND_DataPagamento", nullable = true)
+    private LocalDateTime dataPagamento;
 
 
     public Agendamento() {
@@ -105,4 +121,30 @@ public class Agendamento {
     public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
+
+
+    public StatusPagamento getStatusPagamento() {
+        return this.statusPagamento;
+    }
+
+    public void setStatusPagamento(StatusPagamento statusPagamento) {
+        this.statusPagamento = statusPagamento;
+    }
+
+    public FormaPagamento getFormaPagamento() {
+        return this.formaPagamento;
+    }
+
+    public void setFormaPagamento(FormaPagamento formaPagamento) {
+        this.formaPagamento = formaPagamento;
+    }
+
+    public LocalDateTime getDataPagamento() {
+        return this.dataPagamento;
+    }
+
+    public void setDataPagamento(LocalDateTime dataPagamento) {
+        this.dataPagamento = dataPagamento;
+    }
+
 }

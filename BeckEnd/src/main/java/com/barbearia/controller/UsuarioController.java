@@ -1,5 +1,7 @@
 package com.barbearia.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,21 +28,22 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<?> criarUsuario(@RequestBody Usuario usuario){
-        try{
-            Usuario novoUsuario = usuarioService.criaUsuario(usuario);
-            return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage() ,HttpStatus.BAD_REQUEST);
-        }
+        Usuario novoUsuario = usuarioService.criaUsuario(usuario);
+
+        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<?> listarTodosUsuarios(){
-        try{
-            return new ResponseEntity<>(usuarioService.listarTodosUsuarios(), HttpStatus.OK);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @GetMapping 
+    public ResponseEntity<List<Usuario>> listarTodosUsuarios(){
+        List<Usuario> usuarios = usuarioService.listarTodosUsuarios();
+
+        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    }
+
+    @GetMapping("/ativos")
+    public ResponseEntity<List<Usuario>> listarTodosUsuariosAtivos(){
+        List<Usuario> usuarios = usuarioService.buscarUsuariosAtivos();
+        return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
     @GetMapping("/email/{email}")
@@ -52,21 +55,22 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuario){
-        try{
-            Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuario);
-            return new ResponseEntity<>(usuarioAtualizado, HttpStatus.OK);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuario);
+
+        return new ResponseEntity<>(usuarioAtualizado, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable Integer id){
-        try{
-            usuarioService.deletarUsuario(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> deletarUsuario(@PathVariable Integer id){   
+        usuarioService.deletarUsuario(id);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/{id}/reativar")
+    public ResponseEntity<Usuario> ativarUsuario(@PathVariable Integer id){
+        Usuario usuarioReativado = usuarioService.reativarUsuario(id);
+
+        return new ResponseEntity<>(usuarioReativado, HttpStatus.OK);
     }
 }

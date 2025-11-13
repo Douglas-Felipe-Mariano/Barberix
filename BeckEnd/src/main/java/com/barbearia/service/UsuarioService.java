@@ -41,7 +41,7 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> buscarUsuarioPorEmail (String email){
-        return usuarioRepository.findByEmail(email);
+        return usuarioRepository.findByEmailAndStatus(email,1);
     }
 
     public Usuario atualizarUsuario(Integer id, Usuario usuarioAtualizado){
@@ -76,4 +76,22 @@ public class UsuarioService {
             throw new ResourceNotFoundException("Usuario não encontrado");
         }
     }
+
+    public Usuario reativarUsuario(Integer id){
+        Usuario usuario = usuarioRepository.findById(id)
+                                           .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado."));
+
+        if (usuario.getStatus() == 1 ){
+            throw new BusinesRuleException("Usuario já está ativo");
+        }                                           
+
+        usuario.setStatus(1);
+        return usuarioRepository.save(usuario);
+    }
+
+    public List<Usuario> buscarUsuariosAtivos(){
+            return usuarioRepository.findByStatus(1);
+      }
 }
+
+

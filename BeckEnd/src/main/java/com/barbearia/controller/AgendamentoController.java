@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barbearia.model.Agendamento;
+import com.barbearia.model.enums.FormaPagamento;
 import com.barbearia.service.AgendamentoService;
 
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
@@ -29,13 +30,9 @@ public class AgendamentoController {
 
     @PostMapping
     public ResponseEntity<?> criarAgendamento(@RequestBody Agendamento agendamento){
-        try{
-            Agendamento novoAgendamento = agendamentoService.criarAgendamento(agendamento);
-            
-            return new ResponseEntity<>(novoAgendamento, HttpStatus.CREATED);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        Agendamento novoAgendamento = agendamentoService.criarAgendamento(agendamento);
+
+        return new ResponseEntity<>(novoAgendamento, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -54,22 +51,31 @@ public class AgendamentoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarAgendamento(@PathVariable Integer id, @RequestBody Agendamento detalheAgendamento){
-        try{
-            Agendamento novoAgendamento = agendamentoService.atualizarAgendamento(id, detalheAgendamento);
+        Agendamento novoAgendamento = agendamentoService.atualizarAgendamento(id, detalheAgendamento);
 
-            return new ResponseEntity<>(novoAgendamento, HttpStatus.OK);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(novoAgendamento, HttpStatus.OK);
     }
+
+    @PostMapping("/{id}/pagar")
+    public ResponseEntity<Agendamento> pagarAgendamento(@PathVariable Integer id, @RequestBody FormaPagamento formaPagamento){
+        Agendamento agendamentoPago = agendamentoService.pagarAgendamento(id, formaPagamento);
+
+        return new ResponseEntity<>(agendamentoPago, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/cancelar")
+    public ResponseEntity<Void> cancelarAgendamento(@PathVariable Integer id){
+        agendamentoService.cancelarAgendamento(id);
+        
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarAgendamento(@PathVariable Integer id){
-        try{
-            agendamentoService.deletarAgendamento(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        agendamentoService.deletarAgendamento(id);
+        
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
