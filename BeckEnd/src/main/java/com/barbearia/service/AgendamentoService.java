@@ -7,10 +7,14 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.barbearia.excpetion.BusinesRuleException;
+import com.barbearia.excpetion.ResourceNotFoundException;
 import com.barbearia.model.Agendamento;
 import com.barbearia.model.Barbeiro;
 import com.barbearia.model.Cliente;
 import com.barbearia.model.Servico;
+import com.barbearia.model.enums.FormaPagamento;
+import com.barbearia.model.enums.StatusPagamento;
 import com.barbearia.repository.AgendamentoRepository;
 
 @Service
@@ -31,22 +35,22 @@ public class AgendamentoService {
     public Agendamento criarAgendamento(Agendamento agendamento){
         //Valida se o cliente Existe 
         Cliente cliente = clienteService.buscarClientePorId(agendamento.getCliente().getClienteId())
-                                        .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                                        .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
         //Valida se o barbeiro existe e está ativo
         Barbeiro barbeiro = barbeiroService.buscarBarbeiroAtivoPorId(agendamento.getBarbeiro().getBarbeiroId())
-                                           .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado ou Inativo"));
+                                           .orElseThrow(() -> new ResourceNotFoundException("Barbeiro não encontrado ou Inativo"));
 
         //Valida se o serviço existe 
         Servico servico = servicoService.buscaServicoPorId(agendamento.getServico().getServicoId())                                        
-                                        .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+                                        .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
 
         //Valida se o barbeiro está disponivel no horario desejado                                        
         Optional<Agendamento> validaHorario = agendamentoRepository
                                               .findByBarbeiroAndDataAgendada(barbeiro, agendamento.getDataAgendada());
         
         if (validaHorario.isPresent()){
-            throw new RuntimeException("Este barbeiro já possui um agendamento neste horario");
+            throw new BusinesRuleException("Este barbeiro já possui um agendamento neste horario");
         }                             
         
         //Seta preco do servico para o agendamento
@@ -68,30 +72,34 @@ public class AgendamentoService {
         return agendamentoRepository.findAllByDate(dataAgendamento);
     }
 
+    public Optional<Agendamento> buscarAgendamentoPorId(Integer id){
+        return agendamentoRepository.findById(id);
+    }
+
     public Agendamento atualizarAgendamento(Integer id, Agendamento detalheAgendamento){
         //Recupera o agendamento existente ou retorna uma exception
         Agendamento agendamentoExistente = agendamentoRepository.findById(id)
-                                                                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
+                                                                 .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado"));
 
         //Valida se o cliente foi alterado
         Cliente clienteAtualizado = agendamentoExistente.getCliente();
         if (detalheAgendamento.getCliente() != null){
             clienteAtualizado = clienteService.buscarClientePorId(detalheAgendamento.getCliente().getClienteId())
-                                              .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                                              .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
         }
         
         //Valida se o barbeiro foi alterado
         Barbeiro barbeiroAtualizado = agendamentoExistente.getBarbeiro();
         if (detalheAgendamento.getBarbeiro() != null) {
             barbeiroAtualizado = barbeiroService.buscarBarbeiroAtivoPorId(detalheAgendamento.getBarbeiro().getBarbeiroId())
-                                                .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado ou Inativo"));
+                                                .orElseThrow(() -> new ResourceNotFoundException("Barbeiro não encontrado ou Inativo"));
         }
 
         //Valida se o servico foi alterado
         Servico servicoAtualizado = agendamentoExistente.getServico();
         if (detalheAgendamento.getServico() != null){
             servicoAtualizado = servicoService.buscaServicoPorId(detalheAgendamento.getServico().getServicoId())
-                                              .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+                                              .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
         }
 
         //Valida se a data foi alterada
@@ -105,7 +113,7 @@ public class AgendamentoService {
             Optional<Agendamento> conflitoHorario = agendamentoRepository
                                                    .findByBarbeiroAndDataAgendada(barbeiroAtualizado, dataAtualizada);
             if (conflitoHorario.isPresent() && !conflitoHorario.get().getAgendamentoId().equals(id)){
-                throw new RuntimeException("Esse barbeiro já possui um agendamento neste horario");
+                throw new BusinesRuleException("Esse barbeiro já possui um agendamento neste horario");
             }
         }
 
@@ -120,9 +128,37 @@ public class AgendamentoService {
         return agendamentoRepository.save(agendamentoExistente);
     }
 
+    public Agendamento pagarAgendamento(Integer agendamentoId, FormaPagamento formaPagamento){
+        Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
+                                                       .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado."));
+        
+        if (agendamento.getStatusPagamento() == StatusPagamento.PAGO  || agendamento.getStatusPagamento() == StatusPagamento.CANCELADO){
+            throw new BusinesRuleException("Este agendamento já foi pago ou cancelado");
+        }
+        
+        agendamento.setStatusPagamento(StatusPagamento.PAGO);
+        agendamento.setFormaPagamento(formaPagamento);
+        agendamento.setDataPagamento(LocalDateTime.now());
+
+        return agendamentoRepository.save(agendamento);
+    }
+
+    public void cancelarAgendamento(Integer agendamentoId){
+        Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
+                                                       .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado!"));
+
+        if (agendamento.getStatusPagamento() == StatusPagamento.PAGO){
+            throw new BusinesRuleException("Não é possivel cancelar um agendamento já pago.");
+        }                                                       
+
+        agendamento.setStatusPagamento(StatusPagamento.CANCELADO);
+        
+        agendamentoRepository.save(agendamento);
+    }
+
     public void deletarAgendamento(Integer id){
         if (!agendamentoRepository.existsById(id)){
-            throw new RuntimeException("Agendamento não encontrado");                
+            throw new ResourceNotFoundException("Agendamento não encontrado");                
         }
         agendamentoRepository.deleteById(id);
     }

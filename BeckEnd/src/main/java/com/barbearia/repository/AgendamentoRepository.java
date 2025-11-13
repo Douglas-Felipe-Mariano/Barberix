@@ -16,7 +16,7 @@ import com.barbearia.model.Barbeiro;
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Integer> {
     Optional<Agendamento> findByBarbeiroAndDataAgendada(Barbeiro barbeiro, LocalDateTime dataAgendada);
 
-    List<Agendamento> findAllByDataAgendada(LocalDateTime dataAgendada);
+    List<Agendamento> findByDataAgendada(LocalDateTime dataAgendada);
     
     // Busca todos os agendamentos de um dia específico (ignora a hora)
     @Query("SELECT a FROM Agendamento a WHERE CAST(a.dataAgendada AS date) = CAST(:data AS date)")
