@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.barbearia.exception.BusinesRuleException;
+import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Servico;
 import com.barbearia.repository.ServicoRepository;
 
@@ -19,7 +21,7 @@ public class ServicoService {
         Optional<Servico> servicoExistente = servicoRepository.findByNome(servico.getNome());
 
         if (servicoExistente.isPresent()){
-            throw new RuntimeException("Um serviço com esse nome já está cadastrado");
+            throw new BusinesRuleException("Um serviço com esse nome já está cadastrado");
         }
 
         return servicoRepository.save(servico);
@@ -35,12 +37,12 @@ public class ServicoService {
 
     public Servico atualizaServico(Integer id, Servico detalheServico){
         Servico servicoExistente = servicoRepository.findById(id)
-                                                    .orElseThrow(() -> new RuntimeException("Serviço com o id " +id+ " não encontrado"));
+                                                    .orElseThrow(() -> new ResourceNotFoundException("Serviço com o id " +id+ " não encontrado"));
         if (detalheServico.getNome() != null){
             //Valida se o nome ja existe, ou se é o mesmo nome do serviço a ser atualizado
             Optional<Servico> verificaNome = servicoRepository.findByNome(detalheServico.getNome());
             if (verificaNome.isPresent() && !verificaNome.get().getServicoId().equals(servicoExistente.getServicoId())){
-                throw new RuntimeException("Nome de serviço já cadastrado");
+                throw new BusinesRuleException("Nome de serviço já cadastrado");
             }
             servicoExistente.setNome(detalheServico.getNome()); 
         }
