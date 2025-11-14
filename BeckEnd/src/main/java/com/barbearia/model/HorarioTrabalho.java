@@ -16,7 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "TB_HORARIO_TRABALHO")
 public class HorarioTrabalho {
 
     @Id
@@ -25,7 +25,7 @@ public class HorarioTrabalho {
 
     @ManyToOne
     @JoinColumn(name = "BarbeiroId", nullable = false)
-    private Barbeiro barbeiroId;
+    private Barbeiro barbeiro;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "HT_DiaSemana", nullable = false, length = 20)
@@ -38,7 +38,7 @@ public class HorarioTrabalho {
     private LocalTime horaFim;
 
     @Column(name = "HT_Ativo", nullable = false)
-    private Boolean ativo;
+    private Boolean ativo = true;
 
 
     public Integer getHorarioId() {
@@ -49,12 +49,12 @@ public class HorarioTrabalho {
         this.horarioId = horarioId;
     }
 
-    public Barbeiro getBarbeiroId() {
-        return this.barbeiroId;
+    public Barbeiro getBarbeiro() {
+        return this.barbeiro;
     }
 
-    public void setBarbeiroId(Barbeiro barbeiroId) {
-        this.barbeiroId = barbeiroId;
+    public void setBarbeiro(Barbeiro barbeiro) {
+        this.barbeiro = barbeiro;
     }
 
     public DiaSemana getDiaSemana() {
@@ -80,17 +80,14 @@ public class HorarioTrabalho {
     public void setHoraFim(LocalTime horaFim) {
         this.horaFim = horaFim;
     }
-
-    public Boolean isAtivo() {
-        return this.ativo;
-    }
-
-    public Boolean getAtivo() {
-        return this.ativo;
-    }
-
+    
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
     }
+
+    public Boolean getAtivo(){
+        return this.ativo;
+    }
+    
 
 }
