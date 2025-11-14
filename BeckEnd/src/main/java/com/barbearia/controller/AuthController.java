@@ -6,66 +6,60 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.barbearia.dto.LoginRequestDTO; // 1. IMPORTANDO O DTO
+import com.barbearia.exception.CredenciaisInvalidasException; // (Opcional, mas vamos usar!)
 import com.barbearia.model.Usuario;
-import com.barbearia.repository.UsuarioRepository;
+import com.barbearia.service.UsuarioService; // 2. IMPORTANDO O SERVICE
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-
+// --- 3. ADICIONADO O @RestController ---
+@RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class AuthController {
 
+    // --- 4. INJETANDO O SERVICE E NÃO O REPOSITORY ---
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String senha = credentials.get("senha");
-
+    // --- 5. USANDO O DTO EM VEZ DE MAP ---
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
+        
         System.out.println("=== LOGIN ATTEMPT ===");
-        System.out.println("Email recebido: " + email);
-        System.out.println("Senha recebida: " + senha);
+        System.out.println("Email recebido: " + loginRequest.email());
+        System.out.println("Senha recebida: " + loginRequest.senha());
 
-        // Busca o usuário pelo email
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        // 6. Buscando pelo SERVICE (que já filtra por status=1)
+        Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(loginRequest.email());
 
         if (usuarioOpt.isEmpty()) {
-            System.out.println("ERRO: Email não encontrado no banco");
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Email ou senha incorretos");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+            System.out.println("ERRO: Email não encontrado ou usuário inativo");
+            // 7. Lançando nossa Exceção customizada!
+            throw new CredenciaisInvalidasException("Email ou senha incorretos");
         }
 
         Usuario usuario = usuarioOpt.get();
         System.out.println("Usuário encontrado: " + usuario.getEmail());
-        System.out.println("Hash no banco: " + usuario.getSenha());
-        System.out.println("Status do usuário: " + usuario.getStatus());
 
-        // Verifica se a senha está correta usando BCrypt
-        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.getSenha());
+        // 8. Verificando a senha
+        boolean senhaCorreta = passwordEncoder.matches(loginRequest.senha(), usuario.getSenha());
         System.out.println("Senha correta? " + senhaCorreta);
         
         if (!senhaCorreta) {
             System.out.println("ERRO: Senha incorreta");
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Email ou senha incorretos");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+            // 7. Lançando nossa Exceção customizada!
+            throw new CredenciaisInvalidasException("Email ou senha incorretos");
         }
-
-        // Verifica se o usuário está ativo
-        if (usuario.getStatus() != 1) {
-            System.out.println("ERRO: Usuário inativo");
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Usuário inativo");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-        }
+        
+        // (A checagem de status=1 não é mais necessária aqui, 
+        // pois o 'usuarioService.buscarUsuarioPorEmail' já fez isso!)
 
         System.out.println("LOGIN SUCESSO!");
         
