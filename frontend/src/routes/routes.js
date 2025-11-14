@@ -9,7 +9,7 @@ import Home from '../pages/home/home';
 import Servicos from '../pages/servicos/servicos';
 import Barbeiros from '../pages/barbeiro/barbeiro';
 import Agendamentos from '../pages/agendamentos/agendamentos';
-import Perfis from '../pages/perfil/perfil';
+// import Perfis from '../pages/perfil/perfil';
 import MenuLateral from '../pages/menuLateral/menuLateral';
 import Usuario from '../pages/usuario/usuario';
 import Fila from '../pages/fila/fila';
@@ -82,13 +82,7 @@ function AppRoutes() {
             />
           } />
           
-          {/* Perfis: Apenas ADMIN */}
-          <Route path="/perfis" element={
-            <PrivateRoute 
-              element={Perfis} 
-              allowedProfiles={['ADMIN']} 
-            />
-          } />
+          {/* Rota de Perfis removida, perfil agora é gerenciado no usuário */}
 
           {/* Pagamentos: ADMIN, GERENTE, ATENDENTE */}
           <Route path="/pagamentos" element={

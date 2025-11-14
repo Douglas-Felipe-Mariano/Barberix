@@ -86,12 +86,7 @@ function MenuLateral() {
                     </Link>
                 )}
 
-                {/* 7. Perfis - Apenas ADMIN */}
-                {canAccess(['ADMIN']) && (
-                    <Link to="/perfis" className={`menu-item ${location.pathname === '/perfis' ? 'active' : ''}`}>
-                        <span className="icon">🛡️</span> Perfis
-                    </Link>
-                )}
+                {/* ...item de Perfis removido... */}
 
                 {/* Pagamentos - ADMIN, GERENTE, ATENDENTE */}
                 {canAccess(['ADMIN', 'GERENTE', 'ATENDENTE']) && (

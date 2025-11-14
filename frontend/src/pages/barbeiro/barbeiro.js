@@ -5,6 +5,7 @@ import './barbeiro.css';
 // URL base da API
 const API_URL_BARBEIROS = 'http://localhost:8080/api/barbeiros';
 const API_URL_USUARIOS = 'http://localhost:8080/api/usuarios';
+const API_URL_HORARIOS = 'http://localhost:8080/api/horarios';
 
 function Barbeiros() {
   const [barbeiros, setBarbeiros] = useState([]);
@@ -15,6 +16,19 @@ function Barbeiros() {
     usuarioId: '',
     status: 1
   });
+  const [horariosModalAberto, setHorariosModalAberto] = useState(false);
+  const [barbeiroRecemCriado, setBarbeiroRecemCriado] = useState(null);
+  const [novoHorario, setNovoHorario] = useState({
+    diaSemana: '',
+    horaInicio: '',
+    horaFim: '',
+    ativo: true,
+    aplicarEm: 'APENAS' // 'APENAS' | 'SEG_SEX' | 'TODOS'
+  });
+  const [novoHorarioModalAberto, setNovoHorarioModalAberto] = useState(false);
+  const [novoHorarioTarget, setNovoHorarioTarget] = useState(null);
+  const [horariosList, setHorariosList] = useState([]);
+  const [horarioEditando, setHorarioEditando] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
@@ -27,13 +41,56 @@ function Barbeiros() {
     setError(null);
     try {
       const response = await axios.get(API_URL_BARBEIROS);
-      setBarbeiros(response.data);
+      const data = response.data || [];
+      // buscar horários de cada barbeiro em paralelo e anexar ao objeto
+      const withHorarios = await Promise.all(data.map(async (b) => {
+        try {
+          const r = await axios.get(`${API_URL_HORARIOS}/barbeiro/${b.barbeiroId}`);
+          const horarios = r.data || [];
+          return { ...b, horarios: sortHorarios(horarios) };
+        } catch (e) {
+          // se falhar, retorna sem horários (não bloqueia lista)
+          return { ...b, horarios: [] };
+        }
+      }));
+      setBarbeiros(withHorarios);
     } catch (err) {
       console.error("Erro ao buscar barbeiros:", err);
       setError("Não foi possível carregar os dados dos barbeiros.");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Formata um resumo curto dos horários para exibir na tabela
+  const formatHorariosResumo = (horarios) => {
+    if (!horarios || horarios.length === 0) return 'Nenhum';
+    const sorted = sortHorarios(horarios);
+    const parts = sorted.map(h => `${h.diaSemana.slice(0,3)} ${h.horaInicio}-${h.horaFim}`);
+    if (parts.length <= 2) return parts.join('; ');
+    return `${parts.slice(0,2).join('; ')} (+${parts.length - 2})`;
+  };
+
+  // Ordena horários por dia da semana e hora de início
+  const sortHorarios = (horarios) => {
+    if (!horarios || horarios.length === 0) return [];
+    const ordem = {
+      'SEGUNDA': 1,
+      'TERCA': 2,
+      'QUARTA': 3,
+      'QUINTA': 4,
+      'SEXTA': 5,
+      'SABADO': 6,
+      'DOMINGO': 7
+    };
+    return horarios.slice().sort((a, b) => {
+      const da = ordem[a.diaSemana] || 99;
+      const db = ordem[b.diaSemana] || 99;
+      if (da !== db) return da - db;
+      // Ordena também por hora de início quando mesmo dia
+      if (a.horaInicio && b.horaInicio) return a.horaInicio.localeCompare(b.horaInicio);
+      return 0;
+    });
   };
 
   // Buscar usuários disponíveis
@@ -79,7 +136,13 @@ function Barbeiros() {
         await axios.put(`${API_URL_BARBEIROS}/${barbeiroEditando.barbeiroId}`, dadosParaEnviar);
       } else {
         // CREATE (POST)
-        await axios.post(API_URL_BARBEIROS, dadosParaEnviar);
+        const res = await axios.post(API_URL_BARBEIROS, dadosParaEnviar);
+        const criado = res?.data;
+        // abrir modal de horários para permitir adicionar turnos
+        if (criado && criado.barbeiroId) {
+          setBarbeiroRecemCriado(criado);
+          setHorariosModalAberto(true);
+        }
       }
       resetForm();
       await fetchBarbeiros();
@@ -87,6 +150,142 @@ function Barbeiros() {
       console.error("Erro na operação:", err.response ? err.response.data : err.message);
       setError(err.normalizedMessage || err.response?.data?.message || `Erro ao ${barbeiroEditando ? 'editar' : 'cadastrar'} barbeiro.`);
     }
+  };
+
+  // Horários: criar horário para barbeiro
+  const handleHorarioChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNovoHorario({
+      ...novoHorario,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const criarHorario = async (targetBarbeiroId) => {
+    const barbeiroId = targetBarbeiroId || (barbeiroRecemCriado?.barbeiroId) || (barbeiroEditando?.barbeiroId);
+    if (!barbeiroId) return;
+    try {
+      // define os dias conforme a opção aplicarEm
+      let dias = [];
+      if (novoHorario.aplicarEm === 'SEG_SEX') {
+        dias = ['SEGUNDA','TERCA','QUARTA','QUINTA','SEXTA'];
+      } else if (novoHorario.aplicarEm === 'TODOS') {
+        dias = ['SEGUNDA','TERCA','QUARTA','QUINTA','SEXTA','SABADO','DOMINGO'];
+      } else {
+        // apenas um dia selecionado
+        if (!novoHorario.diaSemana) {
+          setError('Selecione um dia da semana.');
+          return;
+        }
+        dias = [novoHorario.diaSemana];
+      }
+
+      // criar um horário por dia (em paralelo)
+      const posts = dias.map(dia => {
+        const payload = {
+          barbeiro: { barbeiroId: barbeiroId },
+          diaSemana: dia,
+          horaInicio: novoHorario.horaInicio,
+          horaFim: novoHorario.horaFim,
+          ativo: novoHorario.ativo
+        };
+        return axios.post(API_URL_HORARIOS, payload);
+      });
+
+      await Promise.all(posts);
+      // limpa formulário de horário
+      setNovoHorario({ diaSemana: '', horaInicio: '', horaFim: '', ativo: true, aplicarEm: 'APENAS' });
+      // atualizar lista de horários se estivermos no contexto de edição
+      if (barbeiroEditando) await fetchHorariosBarbeiro(barbeiroEditando.barbeiroId);
+      if (barbeiroRecemCriado) await fetchBarbeiros();
+    } catch (err) {
+      console.error('Erro ao criar horário:', err.response ? err.response.data : err.message);
+      setError(err.normalizedMessage || err.response?.data?.message || 'Erro ao criar horário.');
+    }
+  };
+
+  const abrirNovoHorarioModal = (targetId) => {
+    const id = targetId || (barbeiroEditando?.barbeiroId) || (barbeiroRecemCriado?.barbeiroId);
+    setNovoHorarioTarget(id);
+    setNovoHorarioModalAberto(true);
+  };
+
+  const fecharNovoHorarioModal = () => {
+    setNovoHorarioModalAberto(false);
+    setNovoHorarioTarget(null);
+    setNovoHorario({ diaSemana: '', horaInicio: '', horaFim: '', ativo: true, aplicarEm: 'APENAS' });
+  };
+
+  const handleSaveHorario = async () => {
+    if (!novoHorarioTarget) {
+      setError('Barbeiro não definido para novo horário.');
+      return;
+    }
+    try {
+      await criarHorario(novoHorarioTarget);
+      fecharNovoHorarioModal();
+    } catch (e) {
+      // criarHorario já seta o error
+    }
+  };
+
+  const fetchHorariosBarbeiro = async (barbeiroId) => {
+    try {
+      const res = await axios.get(`${API_URL_HORARIOS}/barbeiro/${barbeiroId}`);
+      const horarios = res.data || [];
+      setHorariosList(sortHorarios(horarios));
+    } catch (err) {
+      console.error('Erro ao buscar horários do barbeiro:', err.response ? err.response.data : err.message);
+      setHorariosList([]);
+    }
+  };
+
+  const startEditarHorario = (horario) => {
+    setHorarioEditando(horario);
+    setNovoHorario({
+      diaSemana: horario.diaSemana || '',
+      horaInicio: horario.horaInicio || '',
+      horaFim: horario.horaFim || '',
+      ativo: horario.ativo === undefined ? true : horario.ativo,
+      aplicarEm: 'APENAS'
+    });
+  };
+
+  const atualizarHorario = async () => {
+    if (!horarioEditando) return;
+    try {
+      const payload = {
+        barbeiro: { barbeiroId: horarioEditando.barbeiro?.barbeiroId || barbeiroEditando?.barbeiroId },
+        diaSemana: novoHorario.diaSemana,
+        horaInicio: novoHorario.horaInicio,
+        horaFim: novoHorario.horaFim,
+        ativo: novoHorario.ativo
+      };
+      await axios.put(`${API_URL_HORARIOS}/${horarioEditando.horarioId}`, payload);
+      setHorarioEditando(null);
+      setNovoHorario({ diaSemana: '', horaInicio: '', horaFim: '', ativo: true, aplicarEm: 'APENAS' });
+      if (barbeiroEditando) await fetchHorariosBarbeiro(barbeiroEditando.barbeiroId);
+    } catch (err) {
+      console.error('Erro ao atualizar horário:', err.response ? err.response.data : err.message);
+      setError(err.normalizedMessage || err.response?.data?.message || 'Erro ao atualizar horário.');
+    }
+  };
+
+  const deletarHorario = async (horarioId) => {
+    try {
+      await axios.delete(`${API_URL_HORARIOS}/${horarioId}`);
+      if (barbeiroEditando) await fetchHorariosBarbeiro(barbeiroEditando.barbeiroId);
+      if (barbeiroRecemCriado) await fetchBarbeiros();
+    } catch (err) {
+      console.error('Erro ao deletar horário:', err.response ? err.response.data : err.message);
+      setError(err.normalizedMessage || err.response?.data?.message || 'Erro ao deletar horário.');
+    }
+  };
+
+  const fecharModalHorarios = () => {
+    setHorariosModalAberto(false);
+    setBarbeiroRecemCriado(null);
+    setNovoHorario({ diaSemana: '', horaInicio: '', horaFim: '', ativo: true, aplicarEm: 'APENAS' });
   };
   
   const handleEdit = (barbeiro) => {
@@ -96,6 +295,8 @@ function Barbeiros() {
       usuarioId: barbeiro.usuario?.usuarioId || '',
       status: barbeiro.status,
     });
+    // carregar horários desse barbeiro
+    fetchHorariosBarbeiro(barbeiro.barbeiroId);
     setModalAberto(true);
   };
   
@@ -203,6 +404,7 @@ function Barbeiros() {
                     <th>Nome</th>
                     <th>Email de Login</th>
                     <th>Status</th>
+                    <th>Horários</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -218,8 +420,14 @@ function Barbeiros() {
                           </span>
                       </td>
                       <td>
-                        <button className="btn-editar" onClick={() => handleEdit(barbeiro)}>Editar</button>
-                        <button className="btn-excluir" onClick={() => handleDelete(barbeiro.barbeiroId)}>Excluir</button>
+                        <div className="horarios-resumo">
+                          {formatHorariosResumo(barbeiro.horarios)}
+                        </div>
+                      </td>
+                      <td>
+                        <button type="button" className="btn-editar" onClick={() => handleEdit(barbeiro)}>Editar</button>
+                        <button type="button" className="btn-excluir" onClick={() => handleDelete(barbeiro.barbeiroId)}>Excluir</button>
+                        <button type="button" className="btn-horarios" onClick={() => handleEdit(barbeiro)} style={{marginLeft: '6px'}}>Horários</button>
                       </td>
                     </tr>
                   ))}
@@ -269,7 +477,96 @@ function Barbeiros() {
                         ))}
                       </select>
                     </div>
-                  </div>
+                    
+                    {/* --- Horários de Trabalho do Barbeiro (edição) --- */}
+                    {barbeiroEditando && (
+                      <div className="horarios-section">
+                        <h4>Horários de Trabalho</h4>
+                        {horariosList.length === 0 && <p>Nenhum horário cadastrado para este barbeiro.</p>}
+
+                        {horariosList.length > 0 && (
+                          <table className="horarios-table">
+                            <thead>
+                              <tr>
+                                <th>Dia</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th>Ativo</th>
+                                <th>Ações</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {horariosList.map(h => (
+                                <tr key={h.horarioId}>
+                                  <td>{h.diaSemana}</td>
+                                  <td>{h.horaInicio}</td>
+                                  <td>{h.horaFim}</td>
+                                  <td>{h.ativo ? 'Sim' : 'Não'}</td>
+                                  <td>
+                                    <button type="button" className="btn-editar" onClick={() => startEditarHorario(h)}>Editar</button>
+                                    <button type="button" className="btn-excluir" onClick={() => deletarHorario(h.horarioId)}>Excluir</button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+
+                        <div className="horario-form">
+                          <h5>{horarioEditando ? 'Editar Horário' : 'Adicionar Horário'}</h5>
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>Aplicar em</label>
+                              <select name="aplicarEm" value={novoHorario.aplicarEm} onChange={handleHorarioChange}>
+                                <option value="APENAS">Apenas um dia</option>
+                                <option value="SEG_SEX">Segunda a Sexta</option>
+                                <option value="TODOS">Todos os dias</option>
+                              </select>
+                              {novoHorario.aplicarEm === 'APENAS' && (
+                                <select name="diaSemana" value={novoHorario.diaSemana} onChange={handleHorarioChange} required>
+                                  <option value="">Selecione o dia</option>
+                                  <option value="SEGUNDA">Segunda</option>
+                                  <option value="TERCA">Terça</option>
+                                  <option value="QUARTA">Quarta</option>
+                                  <option value="QUINTA">Quinta</option>
+                                  <option value="SEXTA">Sexta</option>
+                                  <option value="SABADO">Sábado</option>
+                                  <option value="DOMINGO">Domingo</option>
+                                </select>
+                              )}
+                            </div>
+
+                            <div className="form-group">
+                              <label>Hora Início</label>
+                              <input type="time" name="horaInicio" value={novoHorario.horaInicio} onChange={handleHorarioChange} required />
+                            </div>
+
+                            <div className="form-group">
+                              <label>Hora Fim</label>
+                              <input type="time" name="horaFim" value={novoHorario.horaFim} onChange={handleHorarioChange} required />
+                            </div>
+
+                            <div className="form-group">
+                              <label className="checkbox-label">
+                                <input type="checkbox" name="ativo" checked={novoHorario.ativo} onChange={handleHorarioChange} /> Ativo
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="form-actions">
+                            {horarioEditando ? (
+                              <button type="button" className="btn-salvar" onClick={atualizarHorario}>Salvar Horário</button>
+                            ) : (
+                              <button type="button" className="btn-salvar" onClick={() => abrirNovoHorarioModal(barbeiroEditando?.barbeiroId)}>Adicionar Horário</button>
+                            )}
+                            {horarioEditando && (
+                              <button type="button" className="btn-cancelar" onClick={() => { setHorarioEditando(null); setNovoHorario({ diaSemana: '', horaInicio: '', horaFim: '', ativo: true, aplicarEm: 'APENAS' }); }}>Cancelar</button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div> {/* .modal-body */}
 
                   <div className="modal-footer">
                     <button type="button" className="btn-cancelar" onClick={resetForm}>
@@ -280,6 +577,57 @@ function Barbeiros() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+          
+          {/* Mini-modal para adicionar horário (mais limpo) */}
+          {novoHorarioModalAberto && (
+            <div className="modal-overlay" onClick={fecharNovoHorarioModal}>
+              <div className="mini-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>Adicionar Horário</h3>
+                  <button className="modal-close" onClick={fecharNovoHorarioModal}>&times;</button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label>Aplicar em</label>
+                    <select name="aplicarEm" value={novoHorario.aplicarEm} onChange={handleHorarioChange}>
+                      <option value="APENAS">Apenas um dia</option>
+                      <option value="SEG_SEX">Segunda a Sexta</option>
+                      <option value="TODOS">Todos os dias</option>
+                    </select>
+                    {novoHorario.aplicarEm === 'APENAS' && (
+                      <select name="diaSemana" value={novoHorario.diaSemana} onChange={handleHorarioChange} required>
+                        <option value="">Selecione o dia</option>
+                        <option value="SEGUNDA">Segunda</option>
+                        <option value="TERCA">Terça</option>
+                        <option value="QUARTA">Quarta</option>
+                        <option value="QUINTA">Quinta</option>
+                        <option value="SEXTA">Sexta</option>
+                        <option value="SABADO">Sábado</option>
+                        <option value="DOMINGO">Domingo</option>
+                      </select>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Hora Início</label>
+                    <input type="time" name="horaInicio" value={novoHorario.horaInicio} onChange={handleHorarioChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Hora Fim</label>
+                    <input type="time" name="horaFim" value={novoHorario.horaFim} onChange={handleHorarioChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="ativo" checked={novoHorario.ativo} onChange={handleHorarioChange} /> Ativo
+                    </label>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn-cancelar" onClick={fecharNovoHorarioModal}>Cancelar</button>
+                  <button type="button" className="btn-salvar" onClick={handleSaveHorario}>Salvar Horário</button>
+                </div>
               </div>
             </div>
           )}
@@ -310,6 +658,63 @@ function Barbeiros() {
                   <button type="button" className="btn-sim" onClick={confirmarExclusao}>
                     Sim, Excluir
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+ 
+          {/* Modal de Horários ao criar barbeiro */}
+          {horariosModalAberto && barbeiroRecemCriado && (
+            <div className="modal-overlay" onClick={fecharModalHorarios}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h3>Adicionar Horários - {barbeiroRecemCriado.nome}</h3>
+                  <button className="modal-close" onClick={fecharModalHorarios}>&times;</button>
+                </div>
+
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label>Dia da Semana</label>
+                    <select name="aplicarEm" value={novoHorario.aplicarEm} onChange={handleHorarioChange}>
+                      <option value="APENAS">Apenas um dia</option>
+                      <option value="SEG_SEX">Segunda a Sexta</option>
+                      <option value="TODOS">Todos os dias</option>
+                    </select>
+                    {novoHorario.aplicarEm === 'APENAS' && (
+                      <select name="diaSemana" value={novoHorario.diaSemana} onChange={handleHorarioChange} required>
+                        <option value="">Selecione o dia</option>
+                        <option value="SEGUNDA">Segunda</option>
+                        <option value="TERCA">Terça</option>
+                        <option value="QUARTA">Quarta</option>
+                        <option value="QUINTA">Quinta</option>
+                        <option value="SEXTA">Sexta</option>
+                        <option value="SABADO">Sábado</option>
+                        <option value="DOMINGO">Domingo</option>
+                      </select>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Hora Início</label>
+                    <input type="time" name="horaInicio" value={novoHorario.horaInicio} onChange={handleHorarioChange} required />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Hora Fim</label>
+                    <input type="time" name="horaFim" value={novoHorario.horaFim} onChange={handleHorarioChange} required />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="ativo" checked={novoHorario.ativo} onChange={handleHorarioChange} /> Ativo
+                    </label>
+                  </div>
+
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" className="btn-cancelar" onClick={fecharModalHorarios}>Fechar</button>
+                  <button type="button" className="btn-salvar" onClick={criarHorario}>Adicionar Horário</button>
                 </div>
               </div>
             </div>

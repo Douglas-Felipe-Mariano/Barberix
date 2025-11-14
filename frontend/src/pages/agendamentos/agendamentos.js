@@ -9,12 +9,14 @@ const API_URL_AGENDAMENTOS = 'http://localhost:8080/api/agendamentos';
 const API_URL_CLIENTES = 'http://localhost:8080/api/clientes';
 const API_URL_BARBEIROS = 'http://localhost:8080/api/barbeiros';
 const API_URL_SERVICOS = 'http://localhost:8080/api/servicos';
+const API_URL_HORARIOS = 'http://localhost:8080/api/horarios';
 
 function Agendamentos() {
   const [agendamentos, setAgendamentos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [barbeiros, setBarbeiros] = useState([]);
   const [servicos, setServicos] = useState([]);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
   const [formData, setFormData] = useState({
     clienteId: '',
     barbeiroId: '',
@@ -80,10 +82,31 @@ function Agendamentos() {
   }, []);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Se o barbeiro foi selecionado, buscar os horários disponíveis
+    if (name === 'barbeiroId') {
+      const id = parseInt(value);
+      if (!isNaN(id) && id) {
+        fetchHorariosBarbeiro(id);
+      } else {
+        setHorariosDisponiveis([]);
+      }
+    }
+  };
+
+  const fetchHorariosBarbeiro = async (barbeiroId) => {
+    try {
+      const res = await axios.get(`${API_URL_HORARIOS}/barbeiro/${barbeiroId}`);
+      setHorariosDisponiveis(res.data || []);
+    } catch (err) {
+      console.error('Erro ao buscar horários do barbeiro:', err);
+      setHorariosDisponiveis([]);
+    }
   };
 
   // Formata data YYYY-MM-DD para exibição DD/MM/YYYY
@@ -115,6 +138,59 @@ function Agendamentos() {
         dataAgendada: dataHoraCompleta,
         valor: servicoSelecionado?.preco || 0
       };
+
+      // Validação local: checar se o barbeiro trabalha no dia/hora selecionado
+      const barbeiroIdNum = parseInt(formData.barbeiroId);
+      const barbeiroDisponivel = async () => {
+        try {
+          const res = await axios.get(`${API_URL_HORARIOS}/barbeiro/${barbeiroIdNum}`);
+          const horarios = res.data || [];
+
+          // calcula dia da semana no formato do backend (DOMINGO, SEGUNDA, ...)
+          const dataObj = new Date(dataHoraCompleta);
+          const jsDay = dataObj.getDay(); // 0 (domingo) .. 6 (sabado)
+          const diaMap = {
+            0: 'DOMINGO',
+            1: 'SEGUNDA',
+            2: 'TERCA',
+            3: 'QUARTA',
+            4: 'QUINTA',
+            5: 'SEXTA',
+            6: 'SABADO'
+          };
+          const diaNome = diaMap[jsDay];
+
+          // hora selecionada em minutos
+          const [hh, mm] = formData.hora.split(':').map(x => parseInt(x, 10));
+          const minutosSelecionado = hh * 60 + mm;
+
+          // filtra horarios ativos e do mesmo dia
+          const horariosDoDia = horarios.filter(h => h.ativo === true && h.diaSemana === diaNome);
+          if (horariosDoDia.length === 0) return { ok: false, reason: 'O barbeiro não trabalha neste dia da semana.' };
+
+          // verifica se algum turno contempla a hora
+          const dentro = horariosDoDia.some(h => {
+            const inicioParts = (h.horaInicio || '').split(':').map(x => parseInt(x,10));
+            const fimParts = (h.horaFim || '').split(':').map(x => parseInt(x,10));
+            const inicioMin = (inicioParts[0] || 0) * 60 + (inicioParts[1] || 0);
+            const fimMin = (fimParts[0] || 0) * 60 + (fimParts[1] || 0);
+            // backend aceita hora >= inicio && hora < fim
+            return (minutosSelecionado >= inicioMin) && (minutosSelecionado < fimMin);
+          });
+
+          if (!dentro) return { ok: false, reason: 'O barbeiro não atende neste horario.' };
+          return { ok: true };
+        } catch (err) {
+          // se falhar a validação local, não bloquear — deixa o backend validar
+          return { ok: true };
+        }
+      };
+
+      const dispon = await barbeiroDisponivel();
+      if (!dispon.ok) {
+        setError(dispon.reason);
+        return;
+      }
 
       if (agendamentoEditando) {
         // UPDATE (PUT)
@@ -255,6 +331,16 @@ function Agendamentos() {
                     <option value="">-- Selecione o Barbeiro --</option>
                     {barbeiros.map(b => <option key={b.barbeiroId} value={b.barbeiroId}>{b.nome}</option>)}
                   </select>
+                  {horariosDisponiveis.length > 0 && (
+                    <div className="horarios-info">
+                      <strong>Horários do Barbeiro:</strong>
+                      <ul>
+                        {horariosDisponiveis.map(h => (
+                          <li key={h.horarioId}>{h.diaSemana} — {h.horaInicio} até {h.horaFim}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Serviço */}
@@ -364,6 +450,16 @@ function Agendamentos() {
                         <option value="">-- Selecione o Barbeiro --</option>
                         {barbeiros.map(b => <option key={b.barbeiroId} value={b.barbeiroId}>{b.nome}</option>)}
                       </select>
+                      {horariosDisponiveis.length > 0 && (
+                        <div className="horarios-info">
+                          <strong>Horários do Barbeiro:</strong>
+                          <ul>
+                            {horariosDisponiveis.map(h => (
+                              <li key={h.horarioId}>{h.diaSemana} — {h.horaInicio} até {h.horaFim}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">

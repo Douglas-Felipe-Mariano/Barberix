@@ -4,14 +4,15 @@ import './usuario.css';
 
 // URL base da API
 const API_URL_USUARIOS = 'http://localhost:8080/api/usuarios';
-const API_URL_PERFIS = 'http://localhost:8080/api/perfis';
+const API_URL_BARBEIROS = 'http://localhost:8080/api/barbeiros';
+// const API_URL_PERFIS = 'http://localhost:8080/api/perfis';
 
 function Usuario() {
   const [usuarios, setUsuarios] = useState([]);
-  const [perfis, setPerfis] = useState([]);
+  // const [perfis, setPerfis] = useState([]);
   const [usuarioEditando, setUsuarioEditando] = useState(null); 
   const [formData, setFormData] = useState({
-    perfilId: '',
+    perfil: '',
     email: '',
     senha: '',
     status: 1
@@ -37,19 +38,9 @@ function Usuario() {
     }
   };
 
-  // Buscar perfis da API
-  const fetchPerfis = async () => {
-    try {
-      const response = await axios.get(API_URL_PERFIS);
-      setPerfis(response.data);
-    } catch (err) {
-      console.error("Erro ao buscar perfis:", err);
-      setError("Não foi possível carregar os perfis.");
-    }
-  };
+  // ...existing code...
 
   useEffect(() => {
-    fetchPerfis();
     fetchUsuarios();
   }, []);
 
@@ -62,7 +53,7 @@ function Usuario() {
   };
 
   const resetForm = () => {
-    setFormData({ perfilId: '', email: '', senha: '', status: 1 });
+    setFormData({ perfil: '', email: '', senha: '', status: 1 });
     setUsuarioEditando(null);
     setModalAberto(false);
   };
@@ -72,7 +63,7 @@ function Usuario() {
     try {
       // Prepara os dados para enviar ao backend
       const dadosParaEnviar = {
-        perfil: { perfilId: parseInt(formData.perfilId) },
+        perfil: formData.perfil,
         email: formData.email,
         status: formData.status
       };
@@ -92,7 +83,26 @@ function Usuario() {
           return;
         }
         dadosParaEnviar.senha = formData.senha;
-        await axios.post(API_URL_USUARIOS, dadosParaEnviar);
+        // cria o usuário e captura resposta
+        const createRes = await axios.post(API_URL_USUARIOS, dadosParaEnviar);
+        const usuarioCriado = createRes?.data;
+
+        // Se perfil for BARBEIRO, cria também o barbeiro associado
+        if (formData.perfil === 'BARBEIRO' && usuarioCriado && usuarioCriado.usuarioId) {
+          try {
+            const nomeBarbeiro = usuarioCriado.email ? usuarioCriado.email.split('@')[0] : usuarioCriado.email || '';
+            const barbeiroPayload = {
+              nome: nomeBarbeiro,
+              usuario: { usuarioId: usuarioCriado.usuarioId },
+              status: 1
+            };
+            await axios.post(API_URL_BARBEIROS, barbeiroPayload);
+          } catch (barErr) {
+            console.error('Erro ao criar barbeiro automático:', barErr.response ? barErr.response.data : barErr.message);
+            // não bloqueia a criação do usuário, mas notifica
+            setError('Usuário criado, mas falha ao criar barbeiro automaticamente.');
+          }
+        }
       }
       resetForm();
       await fetchUsuarios();
@@ -105,7 +115,7 @@ function Usuario() {
   const handleEdit = (usuario) => {
     setUsuarioEditando(usuario);
     setFormData({
-      perfilId: usuario.perfil?.perfilId || '',
+      perfil: usuario.perfil || '',
       email: usuario.email,
       senha: '', // NUNCA pré-preencher a senha
       status: usuario.status,
@@ -158,13 +168,13 @@ function Usuario() {
         <form onSubmit={handleSubmit}>
           
               <div className="form-inputs-container">
-                <select name="perfilId" value={formData.perfilId} onChange={handleChange} required>
+                <select name="perfil" value={formData.perfil || ''} onChange={handleChange} required>
                   <option value="">Selecione o Perfil</option>
-                  {perfis.map(perfil => (
-                    <option key={perfil.perfilId} value={perfil.perfilId}>
-                      {perfil.nomePerfil}
-                    </option>
-                  ))}
+                  <option value="ADMIN">Admin</option>
+                  <option value="BARBEIRO">Barbeiro</option>
+                  <option value="CLIENTE">Cliente</option>
+                  <option value="ATENDENTE">Atendente</option>
+                  <option value="GERENTE">Gerente</option>
                 </select>
 
                 <input 
@@ -224,7 +234,7 @@ function Usuario() {
                   {usuarios.map((usuario) => (
                     <tr key={usuario.usuarioId}>
                       <td>{usuario.usuarioId}</td>
-                      <td>{usuario.perfil?.nomePerfil || 'N/A'}</td>
+                      <td>{usuario.perfil || 'N/A'}</td>
                       <td>{usuario.email}</td>
                       <td>{usuario.dataCadastro ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR') : 'N/A'}</td>
                       <td>
@@ -255,14 +265,14 @@ function Usuario() {
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body">
                     <div className="form-group">
-                      <label htmlFor="perfilId">Perfil</label>
-                      <select id="perfilId" name="perfilId" value={formData.perfilId} onChange={handleChange} required>
+                      <label htmlFor="perfil">Perfil</label>
+                      <select id="perfil" name="perfil" value={formData.perfil || ''} onChange={handleChange} required>
                         <option value="">Selecione o Perfil</option>
-                        {perfis.map(perfil => (
-                          <option key={perfil.perfilId} value={perfil.perfilId}>
-                            {perfil.nomePerfil}
-                          </option>
-                        ))}
+                        <option value="ADMIN">Admin</option>
+                        <option value="BARBEIRO">Barbeiro</option>
+                        <option value="CLIENTE">Cliente</option>
+                        <option value="ATENDENTE">Atendente</option>
+                        <option value="GERENTE">Gerente</option>
                       </select>
                     </div>
 
@@ -318,7 +328,7 @@ function Usuario() {
                   <p>Tem certeza que deseja excluir o usuário?</p>
                   <div className="info-usuario">
                     <strong>ID:</strong> {usuarioParaExcluir.usuarioId}<br/>
-                    <strong>Perfil:</strong> {usuarioParaExcluir.perfil?.nomePerfil || 'N/A'}<br/>
+                    <strong>Perfil:</strong> {usuarioParaExcluir.usu_perfil || 'N/A'}<br/>
                     <strong>Email:</strong> {usuarioParaExcluir.email}<br/>
                     <strong>Status:</strong> {usuarioParaExcluir.status === 1 ? 'Ativo' : 'Inativo'}
                   </div>
