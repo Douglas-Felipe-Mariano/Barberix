@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barbearia.model.Agendamento;
@@ -58,7 +57,7 @@ public class AgendamentoController {
     }
 
     @PostMapping("/{id}/pagar")
-    public ResponseEntity<Agendamento> pagarAgendamento(@PathVariable Integer id, @RequestParam FormaPagamento formaPagamento){
+    public ResponseEntity<Agendamento> pagarAgendamento(@PathVariable Integer id, @RequestBody FormaPagamento formaPagamento){
         Agendamento agendamentoPago = agendamentoService.pagarAgendamento(id, formaPagamento);
 
         return new ResponseEntity<>(agendamentoPago, HttpStatus.OK);

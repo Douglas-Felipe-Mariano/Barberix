@@ -1,35 +1,27 @@
 package com.barbearia.service;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.barbearia.exception.BusinesRuleException;
-import com.barbearia.exception.ResourceNotFoundException;
+import com.barbearia.excpetion.BusinesRuleException;
+import com.barbearia.excpetion.ResourceNotFoundException;
 import com.barbearia.model.Agendamento;
 import com.barbearia.model.Barbeiro;
 import com.barbearia.model.Cliente;
-import com.barbearia.model.HorarioTrabalho;
 import com.barbearia.model.Servico;
-import com.barbearia.model.enums.DiaSemana;
 import com.barbearia.model.enums.FormaPagamento;
 import com.barbearia.model.enums.StatusPagamento;
 import com.barbearia.repository.AgendamentoRepository;
-import com.barbearia.repository.HorarioTrabalhoRepository;
 
 @Service
 public class AgendamentoService {
 
     @Autowired
     private AgendamentoRepository agendamentoRepository;
-
-    @Autowired
-    private HorarioTrabalhoRepository horarioTrabalhoRepository;
 
     @Autowired
     private BarbeiroService barbeiroService;
@@ -59,40 +51,7 @@ public class AgendamentoService {
         
         if (validaHorario.isPresent()){
             throw new BusinesRuleException("Este barbeiro já possui um agendamento neste horario");
-        }                         
-        
-        LocalDateTime dataHoraAgendamento = agendamento.getDataAgendada();
-
-        DayOfWeek diaJava = dataHoraAgendamento.getDayOfWeek();
-        LocalTime horaAgendamento = dataHoraAgendamento.toLocalTime();
-
-        DiaSemana diaEnum;
-        try{
-            diaEnum = DiaSemana.valueOf(diaJava.name()); //Tentativa de conversao direta
-        } catch (IllegalArgumentException e){
-            diaEnum = converterDiaSemana(diaJava);
-        }
-
-        List<HorarioTrabalho> horariosTrabalhos = horarioTrabalhoRepository.findByBarbeiroAndDiaSemanaAndAtivo(barbeiro, diaEnum, true);
-
-        if (horariosTrabalhos.isEmpty()){
-            throw new BusinesRuleException("O barbeiro não trabalha neste dia da semana.");
-        }
-
-        boolean dentroDoHorario = false;
-        for ( HorarioTrabalho turno : horariosTrabalhos){
-            LocalTime inicoTurno = turno.getHoraInicio();
-            LocalTime fimTurno   = turno.getHoraFim();
-
-            if ((horaAgendamento.isAfter(inicoTurno) || horaAgendamento.equals(inicoTurno)) && (horaAgendamento.isBefore(fimTurno))){
-                dentroDoHorario = true;
-                break;
-            }
-        }
-
-        if (!dentroDoHorario){
-            throw new BusinesRuleException("O barbeiro não atende neste horario");
-        }
+        }                             
         
         //Seta preco do servico para o agendamento
         agendamento.setValor(servico.getPreco());
@@ -202,19 +161,5 @@ public class AgendamentoService {
             throw new ResourceNotFoundException("Agendamento não encontrado");                
         }
         agendamentoRepository.deleteById(id);
-    }
-
-    private DiaSemana converterDiaSemana(DayOfWeek diaJava){
-        switch (diaJava){
-            case  MONDAY    :  return DiaSemana.SEGUNDA;
-            case  TUESDAY   :  return DiaSemana.TERCA;
-            case  WEDNESDAY :  return DiaSemana.QUARTA;
-            case  THURSDAY  :  return DiaSemana.QUINTA;
-            case  FRIDAY    :  return DiaSemana.SEXTA;
-            case  SATURDAY  :  return DiaSemana.SABADO;
-            case  SUNDAY    :  return DiaSemana.DOMINGO;
-            default:
-                throw new IllegalArgumentException("Dia da semana inesperado: " + diaJava);
-        }
     }
 }

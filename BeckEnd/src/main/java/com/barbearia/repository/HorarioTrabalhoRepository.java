@@ -10,7 +10,7 @@ import com.barbearia.model.HorarioTrabalho;
 import com.barbearia.model.enums.DiaSemana;
 
 @Repository
-public interface HorarioTrabalhoRepository extends JpaRepository <HorarioTrabalho, Integer> {
+public interface HorarioTrabalhoRepository extends JpaRepository {
 
     List<HorarioTrabalho> findByBarbeiroAndDiaSemanaAndAtivo(Barbeiro  barbeiro
                                                             ,DiaSemana diaSemana
