@@ -11,7 +11,7 @@ O projeto resolve a "dor" de pequenas e médias barbearias que ainda dependem de
 
 Nosso **objetivo** é centralizar a operação, permitindo que clientes façam o auto-agendamento online e que os gerentes tenham uma visão clara do negócio através de relatórios.
 
-## [cite_start]⚙️ Stack Tecnológica (Arquitetura) [cite: 46]
+## [cite_start]⚙️ Stack Tecnológica (Arquitetura) 
 
 * **Backend (Pasta `/backEnd`):**
     * Java (JDK 21)
@@ -33,7 +33,7 @@ Nosso **objetivo** é centralizar a operação, permitindo que clientes façam o
 
 Para rodar este projeto localmente, você precisará ter o **JDK 21** e o **Node.js (v18+)** instalados.
 
-### [cite_start]1. Backend (API Spring) 
+### 1. Backend (API Spring) 
 
 O backend é a "cozinha". Ele precisa estar rodando para que o frontend funcione.
 
