@@ -15,14 +15,7 @@ import Usuario from '../pages/usuario/usuario';
 import Fila from '../pages/fila/fila';
 import Pagamentos from '../pages/pagamentos/pagamentos';
 import ClientePagamentos from '../pages/pagamentos/clientePagamentos';
-
-/**
- * Configuração de Permissões por Perfil:
- * - ADMIN: Acesso total ao sistema
- * - GERENTE: Acesso a gestão (clientes, barbeiros, serviços, agendamentos)
- * - ATENDENTE: Acesso a agendamentos e clientes
- * - BARBEIRO: Acesso apenas a visualização de agendamentos
- */
+import LandingPage from '../pages/landinpage/landinpage';
 
 function AppRoutes() {
   return (
@@ -30,6 +23,8 @@ function AppRoutes() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
+
+          <Route path="/landinpage" element={<LandingPage />} />
           
           {/* Rotas acessíveis a todos os usuários autenticados */}
           <Route path="/home" element={<PrivateRoute element={Home} />}/>
