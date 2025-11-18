@@ -23,13 +23,12 @@ CREATE TABLE TB_USUARIO (UsuarioId         INT              IDENTITY PRIMARY KEY
 CREATE TABLE TB_SERVICO (ServicoId                   INT             PRIMARY KEY     IDENTITY
 						,SERV_Nome                   VARCHAR(45)     NOT NULL        UNIQUE
 						,SERV_DuracaoMinutos		 INT			 NOT NULL
-						,SERV_Preco                  DECIMAL(10,2)   NOT NULL)
+						,SERV_Preco                  DECIMAL(10,2)   NOT NULL);
 
 CREATE TABLE TB_BARBEIRO (BarbeiroId     INT   		   IDENTITY PRIMARY KEY
 						 ,UsuarioId	  	 INT   		   NOT NULL
 						 ,BARB_Nome      VARCHAR(100)  NOT NULL
 						 ,BARB_Status	 BIT		   NOT NULL DEFAULT 1
-
 						 ,CONSTRAINT FK_BARBEIRO_USUARIO FOREIGN KEY (UsuarioId) REFERENCES TB_USUARIO(UsuarioId));
 
 
@@ -40,7 +39,7 @@ CREATE TABLE TB_AGENDAMENTO (AgendamentoId					INT IDENTITY PRIMARY KEY
 							,AGEND_DataAgendada				DATETIME2		NOT NULL
 							,AGEND_DataRegistroAgendamento  DATETIME2		NOT NULL DEFAULT GETDATE()
 							,AGEND_Valor					DECIMAL(10,2)   NOT NULL
-							,AGEND_StatusPagamento			VARCHAR(20)     NOT NULL DEFAULT ("PENDENTE")
+							,AGEND_StatusPagamento			VARCHAR(20)     NOT NULL DEFAULT ('PENDENTE')
 							,AGEND_FormaPagamento			VARCHAR(20)     NULL
 							,AGEND_DataPagamento			DATETIME2	    NULL
 							,CONSTRAINT FK_AGENDAMENTO_CLIENTE  FOREIGN KEY (ClienteId)  REFERENCES TB_CLIENTE(ClienteId)
@@ -54,6 +53,5 @@ CREATE TABLE TB_HORARIO_TRABALHO (HorarioId 		INT 		IDENTITY PRIMARY KEY
 								  ,HT_HoraInicio	TIME		NOT NULL
 								  ,HT_HoraFim		TIME		NOT NULL
 								  ,HT_Ativo			BIT 		NOT NULL DEFAULT 1
-								  ,CONSTRAINT FK_HORARIO_BARBEIRO FOREIGN KEY (BarbeiroId) REFERENCES TB_BARBEIRO (BarbeiroId));							
-
-							
+								  ,CONSTRAINT FK_HORARIO_BARBEIRO FOREIGN KEY (BarbeiroId) REFERENCES TB_BARBEIRO (BarbeiroId)
+								   ON DELETE CASCADE);							
