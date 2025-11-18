@@ -4,7 +4,6 @@ import './agendamentos.css';
 import PaymentForm from '../../components/PaymentForm';
 import paymentsService from '../../services/payments';
 
-// URLs das APIs
 const API_URL_AGENDAMENTOS = 'http://localhost:8080/api/agendamentos';
 const API_URL_CLIENTES = 'http://localhost:8080/api/clientes';
 const API_URL_BARBEIROS = 'http://localhost:8080/api/barbeiros';
@@ -34,7 +33,6 @@ function Agendamentos() {
   const [paymentAgendamento, setPaymentAgendamento] = useState(null);
   const [paidSet, setPaidSet] = useState(new Set());
 
-  // Buscar agendamentos
   const fetchAgendamentos = async () => {
     setLoading(true);
     setError(null);
@@ -49,7 +47,6 @@ function Agendamentos() {
     }
   };
 
-  // Buscar clientes, barbeiros e serviços
   const fetchDadosRelacionados = async () => {
     try {
       const [clientesRes, barbeirosRes, servicosRes] = await Promise.all([
@@ -68,14 +65,14 @@ function Agendamentos() {
   useEffect(() => {
     fetchDadosRelacionados();
     fetchAgendamentos();
-    // carrega pagamentos para marcar status
+
     const loadPayments = async () => {
       try {
         const pagos = await paymentsService.list();
         const ids = new Set(pagos.filter(p => p.agendamentoId).map(p => String(p.agendamentoId)));
         setPaidSet(ids);
       } catch (err) {
-        // ignore
+        console.error('Erro ao carregar pagamentos:', err);
       }
     };
     loadPayments();
@@ -88,7 +85,6 @@ function Agendamentos() {
       [name]: value,
     });
 
-    // Se o barbeiro foi selecionado, buscar os horários disponíveis
     if (name === 'barbeiroId') {
       const id = parseInt(value);
       if (!isNaN(id) && id) {
@@ -109,7 +105,6 @@ function Agendamentos() {
     }
   };
 
-  // Formata data YYYY-MM-DD para exibição DD/MM/YYYY
   const formatarDataInput = (dataISO) => {
     if (!dataISO) return '';
     const [ano, mes, dia] = dataISO.split('-');
@@ -125,10 +120,8 @@ function Agendamentos() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Concatena data e hora no formato ISO 8601
       const dataHoraCompleta = `${formData.dataAgendada}T${formData.hora}:00`;
       
-      // Busca o serviço selecionado para pegar o preço
       const servicoSelecionado = servicos.find(s => s.servicoId === parseInt(formData.servicoId));
       
       const dadosParaEnviar = {
@@ -139,16 +132,14 @@ function Agendamentos() {
         valor: servicoSelecionado?.preco || 0
       };
 
-      // Validação local: checar se o barbeiro trabalha no dia/hora selecionado
       const barbeiroIdNum = parseInt(formData.barbeiroId);
       const barbeiroDisponivel = async () => {
         try {
           const res = await axios.get(`${API_URL_HORARIOS}/barbeiro/${barbeiroIdNum}`);
           const horarios = res.data || [];
 
-          // calcula dia da semana no formato do backend (DOMINGO, SEGUNDA, ...)
           const dataObj = new Date(dataHoraCompleta);
-          const jsDay = dataObj.getDay(); // 0 (domingo) .. 6 (sabado)
+          const jsDay = dataObj.getDay();
           const diaMap = {
             0: 'DOMINGO',
             1: 'SEGUNDA',
@@ -160,21 +151,18 @@ function Agendamentos() {
           };
           const diaNome = diaMap[jsDay];
 
-          // hora selecionada em minutos
           const [hh, mm] = formData.hora.split(':').map(x => parseInt(x, 10));
           const minutosSelecionado = hh * 60 + mm;
 
-          // filtra horarios ativos e do mesmo dia
           const horariosDoDia = horarios.filter(h => h.ativo === true && h.diaSemana === diaNome);
           if (horariosDoDia.length === 0) return { ok: false, reason: 'O barbeiro não trabalha neste dia da semana.' };
 
-          // verifica se algum turno contempla a hora
-          const dentro = horariosDoDia.some(h => {
+            const dentro = horariosDoDia.some(h => {
             const inicioParts = (h.horaInicio || '').split(':').map(x => parseInt(x,10));
             const fimParts = (h.horaFim || '').split(':').map(x => parseInt(x,10));
             const inicioMin = (inicioParts[0] || 0) * 60 + (inicioParts[1] || 0);
             const fimMin = (fimParts[0] || 0) * 60 + (fimParts[1] || 0);
-            // backend aceita hora >= inicio && hora < fim
+
             return (minutosSelecionado >= inicioMin) && (minutosSelecionado < fimMin);
           });
 
@@ -193,10 +181,8 @@ function Agendamentos() {
       }
 
       if (agendamentoEditando) {
-        // UPDATE (PUT)
         await axios.put(`${API_URL_AGENDAMENTOS}/${agendamentoEditando.agendamentoId}`, dadosParaEnviar);
       } else {
-        // CREATE (POST)
         await axios.post(API_URL_AGENDAMENTOS, dadosParaEnviar);
       }
       resetForm();
@@ -208,7 +194,6 @@ function Agendamentos() {
   };
   
   const handleEdit = (agendamento) => {
-    // Separa data e hora do campo dataAgendada
     const dataAgendada = new Date(agendamento.dataAgendada);
     const data = dataAgendada.toISOString().substring(0, 10);
     const hora = dataAgendada.toTimeString().substring(0, 5);
@@ -247,7 +232,6 @@ function Agendamentos() {
     setAgendamentoParaExcluir(null);
   };
   
-  // Ações de pagamento
   const openPaymentForm = (agendamento) => {
     setPaymentAgendamento(agendamento);
     setShowPaymentForm(true);
@@ -266,7 +250,6 @@ function Agendamentos() {
         clienteId: paymentAgendamento?.cliente?.clienteId || data.clienteId,
       };
       const created = await paymentsService.create(payload);
-      // atualizar conjunto de pagamentos pagos
       if (created && created.agendamentoId) {
         setPaidSet(prev => new Set(prev).add(String(created.agendamentoId)));
       }
@@ -279,7 +262,6 @@ function Agendamentos() {
     }
   };
 
-  // Função auxiliar para formatar a data/hora para exibição
   const formatarDataHora = (isoString) => {
     if (!isoString) return 'N/A';
     const data = new Date(isoString);

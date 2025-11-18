@@ -2,21 +2,15 @@ import React from 'react';
 import { FaCalendarAlt, FaMoneyBillWave, FaBell, FaUserFriends, FaWhatsapp } from 'react-icons/fa';
 import './landinpage.css'
 
-// NOTA: Para funcionar corretamente, você precisará garantir que o arquivo 'landinpage.css' 
-// (que contém todas as classes de estilo) esteja importado e acessível neste ambiente.
-//
-// Para os ícones, estamos usando placeholders de emoji (classe .icon). Em um ambiente React real, 
-// você usaria uma biblioteca como 'react-icons' ou Font Awesome.
-
-// Defina o nome do seu sistema aqui
 const NOME_DO_SISTEMA = "Barberix";
 
 function LandingPageSaaS() {
-    // Estado do menu mobile
+
     const [menuOpen, setMenuOpen] = React.useState(false);
     function toggleMenu() {
       setMenuOpen((open) => !open);
     }
+    
     // Fecha o menu ao clicar fora
     React.useEffect(() => {
       if (!menuOpen) return;
@@ -28,7 +22,7 @@ function LandingPageSaaS() {
       window.addEventListener('mousedown', handleClick);
       return () => window.removeEventListener('mousedown', handleClick);
     }, [menuOpen]);
-    // Estado do formulário
+
     const [form, setForm] = React.useState({
       barbearia: "",
       nome: "",
@@ -39,9 +33,7 @@ function LandingPageSaaS() {
     const [success, setSuccess] = React.useState(false);
     const [fadeOut, setFadeOut] = React.useState(false);
 
-    // Manipulador de mudança
     function handleChange(e) {
-      // Máscara para telefone (WhatsApp)
       if (e.target.name === "whatsapp") {
         let value = e.target.value.replace(/\D/g, "");
         if (value.length > 11) value = value.slice(0, 11);
@@ -56,7 +48,6 @@ function LandingPageSaaS() {
         }
         setForm({ ...form, whatsapp: formatted });
       } else if (e.target.name === "nome") {
-        // Impede números no campo nome
         let value = e.target.value.replace(/[0-9]/g, "");
         setForm({ ...form, nome: value });
       } else {
@@ -64,19 +55,18 @@ function LandingPageSaaS() {
       }
     }
 
-    // Manipulador de envio
     function handleSubmit(e) {
       e.preventDefault();
       setSending(true);
       setSuccess(false);
-      // Simula envio (substitua por integração real)
+
       setTimeout(() => {
         setSending(false);
         setSuccess(true);
         setForm({ barbearia: "", nome: "", whatsapp: "", email: "" });
       }, 1500);
     }
-  // Ícones profissionais
+
   const IconeAgenda = <FaCalendarAlt className="feature-icon" />;
   const IconeFinanceiro = <FaMoneyBillWave className="feature-icon" />;
   const IconeLembretes = <FaBell className="feature-icon" />;
@@ -84,7 +74,6 @@ function LandingPageSaaS() {
   
   return (
     <div className={`landing-page container${fadeOut ? ' fade-out' : ''}`}> 
-      {/* 1. HEADER: Focado no seu Software */}
       <header className="header">
         <div className="logo">
           <h1>{NOME_DO_SISTEMA}</h1>
@@ -125,40 +114,32 @@ function LandingPageSaaS() {
         )}
       </header>
       
-      {/* 2. HERO: Focado na dor do dono da barbearia */}
       <section className="hero">
-        {/* Título forte focado no problema que você resolve */}
         <h2>Cansado de agenda bagunçada e clientes que não aparecem?</h2>
         <p>Assuma o controle total da sua barbearia com o {NOME_DO_SISTEMA}. O sistema completo de agendamento, financeiro e gestão de clientes.</p>
-        {/* O CTA é para testar o sistema */}
         <a href="#demo" className="cta-button">
           Solicitar Demonstração Gratuita
         </a>
       </section>
 
-      {/* 3. FEATURES (antigo "Serviços"): O que o seu sistema FAZ */}
       <section id="features" className="features-section">
         <h2>Tudo que sua barbearia precisa em um só lugar</h2>
         <div className="features-grid">
-          {/* Feature 1: Agenda */}
           <div className="feature-card fade-in">
             {IconeAgenda}
             <h3>Agenda Online Inteligente</h3>
             <p>Seus clientes agendam sozinhos 24/7. Chega de atender telefone no meio do corte.</p>
           </div>
-          {/* Feature 2: Financeiro */}
           <div className="feature-card fade-in">
             {IconeFinanceiro}
             <h3>Controle Financeiro</h3>
             <p>Saiba exatamente quanto você lucrou no dia, na semana e no mês. Fechamento de caixa em 1 clique.</p>
-          </div>
-          {/* Feature 3: Lembretes */}
+          </div>          
           <div className="feature-card fade-in">
             {IconeLembretes}
             <h3>Lembretes Automáticos</h3>
             <p>Reduza em até 80% as faltas (no-shows) com lembretes automáticos via WhatsApp para seus clientes.</p>
           </div>
-          {/* Feature 4: Clientes */}
           <div className="feature-card fade-in">
             {IconeClientes}
             <h3>Cadastro de Clientes</h3>
@@ -167,7 +148,6 @@ function LandingPageSaaS() {
         </div>
       </section>
 
-      {/* 4. PROVA SOCIAL: Essencial para B2B */}
       <section id="testimonials" className="social-proof-section">
         <h2>Barbearias que confiam no {NOME_DO_SISTEMA}</h2>
         <div className="testimonial-block fade-in">
@@ -205,18 +185,15 @@ function LandingPageSaaS() {
         </div>
       </section>
 
-      {/* 5. ABOUT (Sobre): Foco em POR QUE seu sistema é melhor */}
       <section id="about" className="about">
         <h2>Feito por quem entende de barbearia</h2>
         <p>Nós não somos apenas programadores. Entendemos a correria do dia a dia. Por isso, criamos um sistema simples, rápido e que funciona 100% no celular. Foque no que você faz de melhor (os cortes), que nós cuidamos da gestão.</p>
       </section>
 
-      {/* 6. CTA / CONTATO: Foco em capturar o LEAD */}
       <section id="demo" className="contact-cta">
         <h2>Quer ver o sistema em ação?</h2>
         <p>Preencha o formulário e um de nossos especialistas entrará em contato para uma demonstração gratuita, sem compromisso.</p>
         <form className="contact-form" onSubmit={handleSubmit}>
-          {/* Peça dados relevantes para a venda */}
           <div className="form-inputs-grid">
             <input type="text" name="barbearia" placeholder="Nome da sua Barbearia" value={form.barbearia} onChange={handleChange} required />
             <input type="text" name="nome" placeholder="Seu nome" value={form.nome} onChange={handleChange} required />
@@ -242,7 +219,6 @@ function LandingPageSaaS() {
         </div>
       </section>
 
-      {/* Seção FAQ */}
       <section className="faq-section">
         <h2>Perguntas Frequentes</h2>
         <div className="faq-list">
@@ -270,7 +246,6 @@ function LandingPageSaaS() {
             <a href="#">Termos de Uso</a> | <a href="#">Política de Privacidade</a>
         </p>
       </footer>
-      {/* Botão flutuante WhatsApp */}
       <a
         href="https://wa.me/5599999999999?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20Barberix"
         className="whatsapp-float"

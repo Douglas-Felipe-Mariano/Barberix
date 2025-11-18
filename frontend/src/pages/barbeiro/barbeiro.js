@@ -23,7 +23,7 @@ function Barbeiros() {
     horaInicio: '',
     horaFim: '',
     ativo: true,
-    aplicarEm: 'APENAS' // 'APENAS' | 'SEG_SEX' | 'TODOS'
+    aplicarEm: 'APENAS'
   });
   const [novoHorarioModalAberto, setNovoHorarioModalAberto] = useState(false);
   const [novoHorarioTarget, setNovoHorarioTarget] = useState(null);
