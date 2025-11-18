@@ -37,7 +37,6 @@ function LandingPageSaaS() {
     });
     const [sending, setSending] = React.useState(false);
     const [success, setSuccess] = React.useState(false);
-    // Estado para fade-out
     const [fadeOut, setFadeOut] = React.useState(false);
 
     // Manipulador de mudança
@@ -85,8 +84,6 @@ function LandingPageSaaS() {
   
   return (
     <div className={`landing-page container${fadeOut ? ' fade-out' : ''}`}> 
-        // Estado para fade-out
-        const [fadeOut, setFadeOut] = React.useState(false);
       {/* 1. HEADER: Focado no seu Software */}
       <header className="header">
         <div className="logo">
