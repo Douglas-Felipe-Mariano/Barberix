@@ -98,7 +98,7 @@ function LandingPageSaaS() {
             <li><button className="btn-login-header" style={{ padding: '8px 16px', fontSize: '0.9em', marginLeft: '12px', borderRadius: '10px', border: 'none', background: 'var(--color-background-input)', color: 'var(--color-primary)', fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} onClick={() => {
               setFadeOut(true);
               setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/login';
               }, 400);
             }}>Já sou cliente</button></li>
           </ul>

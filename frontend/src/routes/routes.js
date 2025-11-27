@@ -22,9 +22,8 @@ function AppRoutes() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
-
-          <Route path="/landinpage" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
           
           {/* Rotas acessíveis a todos os usuários autenticados */}
           <Route path="/home" element={<PrivateRoute element={Home} />}/>
