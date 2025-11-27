@@ -66,7 +66,7 @@ public class ClienteController {
         if (clienteService.buscarClientePorId(id).isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); //Se o cliente não for encontrado retorna Not Found
         }
-
+        clienteService.deletarCliente(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); //Temporariamente não deleta nada
     }
 }

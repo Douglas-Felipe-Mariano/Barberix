@@ -13,7 +13,6 @@ import com.barbearia.repository.ClienteRepository;
 
 @Service
 public class ClienteService {
-
     @Autowired
     private ClienteRepository clienteRepository;
 
@@ -59,6 +58,11 @@ public class ClienteService {
         }
 
         return clienteRepository.save(clienteExistente);
+    }
+     public void deletarCliente(Integer id) {
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Cliente com o id: " + id + " não encontrado"));
+        clienteRepository.delete(cliente);
     }
 
     //Adicionar soft delet futuramente - ou mecanismo explicito de inativação de clientes

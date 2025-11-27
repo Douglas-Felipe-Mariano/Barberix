@@ -131,6 +131,14 @@ function Usuario() {
 
   const confirmarExclusao = async () => {
     try {
+      // Se o usuário for barbeiro, tenta excluir o barbeiro vinculado primeiro
+      if (usuarioParaExcluir.perfil === 'BARBEIRO') {
+        try {
+          await axios.delete(`${API_URL_BARBEIROS}/usuario/${usuarioParaExcluir.usuarioId}`);
+        } catch (barbeiroErr) {
+          console.warn('Barbeiro vinculado não encontrado ou erro ao excluir:', barbeiroErr.response ? barbeiroErr.response.data : barbeiroErr.message);
+        }
+      }
       await axios.delete(`${API_URL_USUARIOS}/${usuarioParaExcluir.usuarioId}`);
       await fetchUsuarios();
       setModalExcluirAberto(false);

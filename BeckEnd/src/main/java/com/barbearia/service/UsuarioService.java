@@ -14,6 +14,8 @@ import com.barbearia.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
+    @Autowired
+    private com.barbearia.repository.BarbeiroRepository barbeiroRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -70,10 +72,16 @@ public class UsuarioService {
     }
 
     public void deletarUsuario(Integer id){
-        if(usuarioRepository.existsById(id)){
-            usuarioRepository.deleteById(id);
-        } else{
-            throw new ResourceNotFoundException("Usuario não encontrado");
+        Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado"));
+        usuario.setStatus(0); // Soft delete: desativa o usuário
+        usuarioRepository.save(usuario);
+        // Inativa barbeiro vinculado, se existir
+        java.util.Optional<com.barbearia.model.Barbeiro> barbeiroOpt = barbeiroRepository.findByUsuario(usuario);
+        if (barbeiroOpt.isPresent()) {
+            com.barbearia.model.Barbeiro barbeiro = barbeiroOpt.get();
+            barbeiro.setStatus(0);
+            barbeiroRepository.save(barbeiro);
         }
     }
 
