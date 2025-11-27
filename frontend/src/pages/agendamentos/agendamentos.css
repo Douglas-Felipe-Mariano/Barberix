@@ -712,3 +712,25 @@ table td {
     font-size: 1.2em;
   }
 }
+
+/* ===== Horarios modal styles ===== */
+.modal-horarios .modal-body .muted {
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.horarios-list ul {
+  list-style: disc;
+  margin-left: 18px;
+}
+
+.horario-item {
+  padding: 6px 0;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 600px) {
+  .horarios-list ul {
+    margin-left: 12px;
+  }
+}

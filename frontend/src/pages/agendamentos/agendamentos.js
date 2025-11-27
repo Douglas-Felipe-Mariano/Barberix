@@ -28,11 +28,14 @@ function Agendamentos() {
   const [modalAberto, setModalAberto] = useState(false);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [agendamentoParaExcluir, setAgendamentoParaExcluir] = useState(null);
+  const [horariosModalOpen, setHorariosModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentAgendamento, setPaymentAgendamento] = useState(null);
   const [paidSet, setPaidSet] = useState(new Set());
+
+  
 
   // Buscar agendamentos
   const fetchAgendamentos = async () => {
@@ -48,6 +51,19 @@ function Agendamentos() {
       setLoading(false);
     }
   };
+
+  const handleOpenHorariosModal = async () => {
+    const id = parseInt(formData.barbeiroId);
+    if (!id) return;
+    try {
+      await fetchHorariosBarbeiro(id);
+    } catch (err) {
+      // ignore
+    }
+    setHorariosModalOpen(true);
+  };
+
+  const closeHorariosModal = () => setHorariosModalOpen(false);
 
   // Buscar clientes, barbeiros e serviços
   const fetchDadosRelacionados = async () => {
@@ -331,14 +347,13 @@ function Agendamentos() {
                     <option value="">-- Selecione o Barbeiro --</option>
                     {barbeiros.map(b => <option key={b.barbeiroId} value={b.barbeiroId}>{b.nome}</option>)}
                   </select>
-                  {horariosDisponiveis.length > 0 && (
-                    <div className="horarios-info">
-                      <strong>Horários do Barbeiro:</strong>
-                      <ul>
-                        {horariosDisponiveis.map(h => (
-                          <li key={h.horarioId}>{h.diaSemana} — {h.horaInicio} até {h.horaFim}</li>
-                        ))}
-                      </ul>
+                  {/* Horários agora exibidos apenas no modal 'Consultar Horários' */}
+                  {/* Botão para abrir modal de consulta de horários (aparece somente após selecionar o barbeiro) */}
+                  {formData.barbeiroId && (
+                    <div style={{ marginTop: 8 }}>
+                      <button type="button" className="btn-editar" onClick={handleOpenHorariosModal}>
+                        Consultar Horários
+                      </button>
                     </div>
                   )}
                 </div>
@@ -450,16 +465,7 @@ function Agendamentos() {
                         <option value="">-- Selecione o Barbeiro --</option>
                         {barbeiros.map(b => <option key={b.barbeiroId} value={b.barbeiroId}>{b.nome}</option>)}
                       </select>
-                      {horariosDisponiveis.length > 0 && (
-                        <div className="horarios-info">
-                          <strong>Horários do Barbeiro:</strong>
-                          <ul>
-                            {horariosDisponiveis.map(h => (
-                              <li key={h.horarioId}>{h.diaSemana} — {h.horaInicio} até {h.horaFim}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {/* Horários removidos daqui — use o botão "Consultar Horários" para ver a lista */}
                     </div>
 
                     <div className="form-group">
@@ -549,6 +555,51 @@ function Agendamentos() {
               onSave={handlePaymentSave}
             />
           )}
+
+  {/* Modal de Consulta de Horários (ordenados alfabeticamente por diaSemana) */}
+  {horariosModalOpen && (
+    <div className="modal-overlay" onClick={closeHorariosModal}>
+      <div className="modal-content modal-horarios" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>Horários do Barbeiro</h3>
+          <button className="modal-close" onClick={closeHorariosModal}>&times;</button>
+        </div>
+        <div className="modal-body">
+          <p className="muted">Exibindo horários ordenados alfabeticamente pelo dia da semana.</p>
+          <div className="horarios-list">
+            <ul>
+              {[...horariosDisponiveis].sort((a, b) => {
+                const order = ['SEGUNDA','TERCA','QUARTA','QUINTA','SEXTA','SABADO','DOMINGO'];
+                const aa = (a.diaSemana || '').toUpperCase();
+                const bb = (b.diaSemana || '').toUpperCase();
+                const ia = order.indexOf(aa);
+                const ib = order.indexOf(bb);
+                // if either day is known in our order, prefer that ordering
+                if (ia !== -1 || ib !== -1) {
+                  if (ia === -1) return 1;
+                  if (ib === -1) return -1;
+                  if (ia === ib) {
+                    // same day — sort by start time if available
+                    return (a.horaInicio || '').localeCompare(b.horaInicio || '');
+                  }
+                  return ia - ib;
+                }
+                // fallback to alphabetical then by start time
+                const cmp = aa.localeCompare(bb);
+                if (cmp !== 0) return cmp;
+                return (a.horaInicio || '').localeCompare(b.horaInicio || '');
+              }).map(h => (
+                <li key={h.horarioId} className="horario-item">{h.diaSemana} — {h.horaInicio} até {h.horaFim} {h.ativo ? '' : '(inativo)'}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button type="button" className="btn-cancelar" onClick={closeHorariosModal}>Fechar</button>
+        </div>
+      </div>
+    </div>
+  )}
 
         </div>
   );
