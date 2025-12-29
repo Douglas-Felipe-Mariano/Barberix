@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,18 +18,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.barbearia.model.Agendamento;
 import com.barbearia.model.enums.FormaPagamento;
 import com.barbearia.service.AgendamentoService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/agendamentos")
 public class AgendamentoController {
 
     @Autowired
     private AgendamentoService agendamentoService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'BARBEIRO', 'CLIENTE', 'ATENDENTE')")
     @PostMapping
     public ResponseEntity<?> criarAgendamento(@RequestBody Agendamento agendamento){
         Agendamento novoAgendamento = agendamentoService.criarAgendamento(agendamento);

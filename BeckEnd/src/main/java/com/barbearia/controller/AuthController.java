@@ -1,12 +1,15 @@
 package com.barbearia.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.barbearia.dto.EsqueceuSenhaRequestDTO;
 import com.barbearia.dto.LoginRequestDTO;
 import com.barbearia.dto.LoginResponseDTO;
+import com.barbearia.dto.ResetSenhaRequestDTO;
 import com.barbearia.exception.CredenciaisInvalidasException; 
 import com.barbearia.model.Usuario;
 import com.barbearia.service.JwtService;
@@ -33,7 +36,6 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/login")
-    // --- 5. USANDO O DTO EM VEZ DE MAP ---
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
 
         Optional<Usuario> usuarioOpt = usuarioService.buscarUsuarioPorEmail(loginRequest.email());
@@ -60,4 +62,19 @@ public class AuthController {
         
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> esqueceuSenha(@RequestBody EsqueceuSenhaRequestDTO request) {
+        usuarioService.esqueceuSenha(request.email());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetSenha(@RequestBody ResetSenhaRequestDTO request) {
+        usuarioService.resetarSenha(request.token(), request.novaSenha());
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
+
