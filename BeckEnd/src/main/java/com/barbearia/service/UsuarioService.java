@@ -1,5 +1,6 @@
 package com.barbearia.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.barbearia.exception.BusinesRuleException;
 import com.barbearia.exception.ResourceNotFoundException;
+import com.barbearia.model.ResetToken;
 import com.barbearia.model.Usuario;
+import com.barbearia.repository.ResetTokenRepository;
 import com.barbearia.repository.UsuarioRepository;
 
 @Service
@@ -21,6 +24,13 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ResetTokenRepository resetTokenRepository;
+
+    private static final long EXPIRATION_TIME_MINUTES = 15; 
 
     public Usuario criaUsuario(Usuario usuario){
 
@@ -92,6 +102,52 @@ public class UsuarioService {
     public List<Usuario> buscarUsuariosAtivos(){
             return usuarioRepository.findByStatus(1);
       }
+
+    public void esqueceuSenha(String email){
+        //Busca Usuario por email
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário com o email fornecido não foi encontrado."));
+
+        //Valida se o usuario ja tem um token ativo
+        Optional<ResetToken> tokenAnterior = resetTokenRepository.findByUsuario(usuario);
+        tokenAnterior.ifPresent(resetTokenRepository::delete);        
+
+        //Gera novo token
+        String token = java.util.UUID.randomUUID().toString();
+
+        //define o tempo de expiração
+        LocalDateTime expiracao = LocalDateTime.now().plusMinutes(EXPIRATION_TIME_MINUTES);
+
+        //cria a entidade RestToken
+        ResetToken novoToken = new ResetToken();
+        novoToken.setToken(token);
+        novoToken.setUsuario(usuario);
+        novoToken.setDataExpiracao(expiracao);
+
+        resetTokenRepository.save(novoToken);
+
+        //envia o email que contem o link 
+        emailService.enviarEmailRecuperacao(email, token);
+    }
+
+    public void resetarSenha(String token, String novaSenha){
+        //Valida o token
+        ResetToken resetToken = resetTokenRepository
+                .findByTokenAndDataExpiracaoAfter(token, LocalDateTime.now())
+                .orElseThrow(() -> new BusinesRuleException("Token inválido ou expirado."));
+
+        //Gera o Hash da nova senha e salva
+        String senhaHash = passwordEncoder.encode(novaSenha);
+        
+        
+        //Atualiza a senha do usuario
+        Usuario usuario = resetToken.getUsuario();
+        usuario.setSenha(senhaHash);
+        usuarioRepository.save(usuario);
+        
+        //apaga o token para não ser reutilizado
+        resetTokenRepository.delete(resetToken);
+    }
 }
 
 

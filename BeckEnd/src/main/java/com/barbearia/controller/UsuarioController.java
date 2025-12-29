@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barbearia.model.Usuario;
 import com.barbearia.service.UsuarioService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 

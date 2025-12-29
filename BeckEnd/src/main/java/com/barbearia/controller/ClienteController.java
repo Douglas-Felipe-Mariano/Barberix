@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barbearia.model.Cliente;
 import com.barbearia.service.ClienteService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
 @RequestMapping("/api/clientes")
+@SecurityRequirement(name = "bearerAuth")
 public class ClienteController {
 
     @Autowired
