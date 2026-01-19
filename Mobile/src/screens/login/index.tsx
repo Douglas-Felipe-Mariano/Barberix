@@ -75,7 +75,7 @@ export function LoginScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="Digite seu email"
-            placeholderTextColor="#888"
+            placeholderTextColor={THEME.COLORS.TEXT_SECONDARY}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -86,7 +86,7 @@ export function LoginScreen() {
             value={senha}
             onChangeText={setSenha}
             placeholder="Digite sua senha"
-            placeholderTextColor="#888"
+            placeholderTextColor={THEME.COLORS.TEXT_SECONDARY}
             secureTextEntry
           />
 
@@ -101,6 +101,14 @@ export function LoginScreen() {
               <Text style={styles.buttonText}>Entrar</Text>
             )}
           </TouchableOpacity>
+          <View style={styles.linkRow}>
+            <TouchableOpacity onPress={() => router.push('/esqueceuSenha')}>
+              <Text style={styles.linkText}>Esqueceu a senha?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/registrese')}>
+              <Text style={styles.linkText}>Registre-se</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
