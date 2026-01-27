@@ -1,13 +1,17 @@
 package com.barbearia.model;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.barbearia.model.enums.PerfilTipo;
 
-import com.barbearia.model.enums.PerfilTipo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +25,7 @@ import jakarta.persistence.Table;
 @SQLDelete(sql = "UPDATE TB_USUARIO SET USU_Status = 0 WHERE UsuarioId = ? ")
 @Entity
 @Table(name = "TB_USUARIO")
-public class Usuario {
+public class Usuario implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UsuarioId")
@@ -45,6 +49,43 @@ public class Usuario {
     private LocalDateTime dataCadastro;
 
     public Usuario() {
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + perfil.name()));
+ 
+    }
+
+    @Override
+    public String getPassword(){
+        return senha;
+    }
+
+    @Override
+    public String getUsername(){
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // Um usuário está habilitado se o status dele for 1 (ativo)
+        return status == 1;
     }
 
     public Integer getUsuarioId() {

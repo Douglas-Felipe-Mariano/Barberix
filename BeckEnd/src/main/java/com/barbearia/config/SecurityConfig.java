@@ -1,21 +1,62 @@
 package com.barbearia.config;
 
-import java.util.Arrays; 
+import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration; 
 import org.springframework.web.cors.CorsConfigurationSource; 
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource; 
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.barbearia.service.CustomUserDetailService;
+import com.barbearia.service.security.JwtAuthFilter; 
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+
+        //usa o padroa DAO para buscar no banco 
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        //passa a referencia de como validar o usuario
+        authProvider.setUserDetailsService(customUserDetailService);
+
+        //Passa a referencia para validar a senha 
+        authProvider.setPasswordEncoder(passwordEncoder);
+
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,23 +71,27 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 // Permissão para Swagger e H2 console
                 .requestMatchers(
-                    new AntPathRequestMatcher("/swagger-ui/**"),
-                    new AntPathRequestMatcher("/v3/api-docs/**"),
-                    new AntPathRequestMatcher("/swagger-resources/**"),
-                    new AntPathRequestMatcher("/webjars/**")
+                    new AntPathRequestMatcher("/api/auth/login"),
+                    new AntPathRequestMatcher("/api/usuarios", "POST"), // Permite criar usuário
+                    new AntPathRequestMatcher("/api/pix/**")
                 ).permitAll()
                 
-                // 🚨 REGRA CRÍTICA 1: Permissão total para TODAS as rotas da API (TESTE)
-                // Isso resolve o problema de 403 Forbidden e garante que o CORS funcione.
-                .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() 
+                // Permite acesso público ao Swagger e H2 (para desenvolvimento)
+                .requestMatchers(
+                    new AntPathRequestMatcher("/swagger-ui/**"),
+                    new AntPathRequestMatcher("/v3/api-docs/**"),
+                    new AntPathRequestMatcher("/h2-console/**")
+                ).permitAll()
                 
-                // Permissão H2 console
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated()
                 
-                // 🚨 REGRA CRÍTICA 2: Remove a autenticação obrigatória para o resto
-                // .anyRequest().authenticated() // LINHA REMOVIDA TEMPORARIAMENTE PARA TESTES
+                // Qualquer outro request que não seja /api, também exige autenticação
+                .anyRequest().authenticated()
             )
-            
+            //Adiciona o filtro JWT antes do filtro padrao da autenticação 
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
