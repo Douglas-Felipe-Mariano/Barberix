@@ -4,8 +4,6 @@ CREATE TABLE TB_CLIENTE (ClienteId         INT             IDENTITY PRIMARY KEY
 						,UsuarioId 	       INT 			   NULL     -- NULL para ser possivel o acesso de clientes sem conta
 						,CLI_NOME          VARCHAR(100)    NOT NULL
 						,CLI_Telefone      VARCHAR(16)     NOT NULL -- ID do Cliente Convidado (Guest)
-						,CLI_Email		   VARCHAR(100)    NOT NULL		UNIQUE
-						,CLI_DataCadastro  DATETIME2       NOT NULL     DEFAULT GETDATE()
 						,CLI_Endereco      VARCHAR(255)    NULL
 						,CONSTRAINT FK_CLIENTE_USUARIO FOREIGN KEY (UsuarioId) REFERENCES TB_USUARIO(UsuarioId));
 
@@ -19,9 +17,11 @@ CREATE UNIQUE INDEX IX_CLIENTE_USUARIO ON TB_CLIENTE (UsuarioId) WHERE UsuarioId
 CREATE TABLE TB_USUARIO (UsuarioId         INT              IDENTITY PRIMARY KEY    
 						,USU_Perfil	       VARCHAR(30)		NOT NULL -- 'ADMIN', 'BARBEIRO', 'CLIENTE', 'SECRETARIA'
 						,USU_Email         VARCHAR(100)     NOT NULL        UNIQUE
-						,USU_Senha         VARCHAR(100)     NOT NULL         
+						,USU_Senha         VARCHAR(100)     NULL         
+						,USU_Provider 	   VARCHAR(20)      NOT NULL 	    DEFAULT 'LOCAL'  -- 'LOCAL', 'GOOGLE', 'FACEBOOK', etc.
 						,USU_DataCadastro  DATETIME2        NOT NULL        DEFAULT GETDATE()
-						,USU_Status 	   BIT 				NOT NULL  		DEFAULT 1);
+						,USU_Status 	   BIT 				NOT NULL  		DEFAULT 1
+						,USU_UltimaAlteracao DATETIME2      NULL);  
 					--  Deletado com a implementação do Enum no backend	
 					-- ,CONSTRAINT FK_USUARIO_PERFIL   FOREIGN KEY (PerfilId) REFERENCES TB_PERFIL(PerfilId));
 

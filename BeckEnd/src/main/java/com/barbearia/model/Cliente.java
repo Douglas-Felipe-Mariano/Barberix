@@ -1,14 +1,12 @@
 package com.barbearia.model;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,21 +18,21 @@ public class Cliente {
     @Column(name = "ClienteId", nullable = false)
     private Integer clienteId;
 
+    @OneToOne(optional = true)    
+    @JoinColumn(name = "UsuarioId", nullable = true, unique = true)
+    private Usuario usuario;
+
     @Column(name = "CLI_Nome", length = 100, nullable = false)
     private String nome;
 
     @Column(name = "CLI_Telefone", length = 16, nullable = false)
     private String telefone;
 
-    @Column(name = "CLI_Email", length = 100, nullable = false, unique = true)
-    private String email;
-
-    @Column(name = "CLI_DataCadastro", nullable = false, updatable = false)
-    @CreationTimestamp
-    private LocalDateTime dataCadastro;
-
     @Column(name = "CLI_Endereco", length = 255, nullable = true)
     private String endereco;
+
+    @Column(name = "CLI_FotoUrl", columnDefinition = "VARCHAR(MAX)")
+    private String fotoUrl;
 
 
     public Cliente() {
@@ -64,22 +62,6 @@ public class Cliente {
         this.telefone = telefone;
     }
 
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public LocalDateTime getDataCadastro() {
-        return this.dataCadastro;
-    }
-
-    public void setDataCadastro(LocalDateTime dataCadastro) {
-        this.dataCadastro = dataCadastro;
-    }
-
     public String getEndereco() {
         return this.endereco;
     }
@@ -87,4 +69,22 @@ public class Cliente {
     public void setEndereco(String endereco) {
         this.endereco = endereco;
     } 
+
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getFotoUrl() {
+        return this.fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
 }

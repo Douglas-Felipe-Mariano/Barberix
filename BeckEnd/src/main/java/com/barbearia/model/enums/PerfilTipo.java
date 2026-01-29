@@ -5,5 +5,6 @@ public enum PerfilTipo {
     GERENTE,
     BARBEIRO,
     ATENDENTE,
-    CLIENTE
+    CLIENTE,
+    SECRETARIA
 }

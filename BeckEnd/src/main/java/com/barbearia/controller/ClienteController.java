@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequestMapping("/api/clientes")
 @SecurityRequirement(name = "bearerAuth")
 public class ClienteController {
-
+    
     @Autowired
     private ClienteService clienteService;
 
@@ -69,7 +69,7 @@ public class ClienteController {
         if (clienteService.buscarClientePorId(id).isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); //Se o cliente não for encontrado retorna Not Found
         }
-        clienteService.deletarCliente(id);
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); //Temporariamente não deleta nada
     }
 }

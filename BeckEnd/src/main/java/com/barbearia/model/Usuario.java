@@ -1,15 +1,19 @@
 package com.barbearia.model;
 
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.barbearia.model.enums.AuthProvider;
 import com.barbearia.model.enums.PerfilTipo;
 
 
@@ -20,6 +24,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @SQLDelete(sql = "UPDATE TB_USUARIO SET USU_Status = 0 WHERE UsuarioId = ? ")
@@ -35,18 +40,29 @@ public class Usuario implements UserDetails{
     private Integer status = 1; // Já inicia como 1 Ativo
 
     @Enumerated(EnumType.STRING)  
-    @Column(name = "USU_Perfil", nullable = false)
+    @Column(name = "USU_Perfil", nullable = false, length = 30)
     private PerfilTipo perfil;
 
     @Column(name = "USU_Email", length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "USU_Senha", length = 100, nullable = false)
+    @Column(name = "USU_Senha", length = 255, nullable = true)
     private String senha;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "USU_Provider", nullable = false, length = 20)
+    private AuthProvider provider = AuthProvider.LOCAL;
 
     @Column(name = "USU_DataCadastro", nullable = false, updatable = false)
     @CreationTimestamp //Grava a data da criação do Registro
     private LocalDateTime dataCadastro;
+
+    @UpdateTimestamp
+    @Column(name = "USU_UltimaAlteracao", nullable = true)
+    private LocalDateTime ultimaAlteracao;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<ResetToken> tokens;
 
     public Usuario() {
     }
@@ -135,4 +151,30 @@ public class Usuario implements UserDetails{
         this.status = status;
     }
     
+
+    public AuthProvider getProvider() {
+        return this.provider;
+    }
+
+    public void setProvider(AuthProvider provider) {
+        this.provider = provider;
+    }
+
+    public LocalDateTime getUltimaAlteracao() {
+        return this.ultimaAlteracao;
+    }
+
+    public void setUltimaAlteracao(LocalDateTime ultimaAlteracao) {
+        this.ultimaAlteracao = ultimaAlteracao;
+    }
+
+    public List<ResetToken> getTokens() {
+        return this.tokens;
+    }
+
+    public void setTokens(List<ResetToken> tokens) {
+        this.tokens = tokens;
+    }
+
+
 }
