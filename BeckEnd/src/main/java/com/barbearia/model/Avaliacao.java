@@ -25,15 +25,15 @@ public class Avaliacao {
     @JoinColumn(name = "AgendamentoId", nullable = false, unique = true)
     private Agendamento agendamento;
 
-    @Column(name = "AVA_Nota", nullable = false)
+    @Column(name = "AVAL_Nota", nullable = false)
     private Integer nota;
 
-    @Column(name = "AVA_Comentario", length = 500, nullable = true)
+    @Column(name = "AVAL_Comentario", length = 500, nullable = true)
     private String comentario;
 
     @CreationTimestamp
-    @Column(name = "AVA_DataAvaliacao", nullable = false, updatable = false)
-    private LocalDateTime dataAvaliacao;
+    @Column(name = "AVAL_Data", nullable = false, updatable = false)
+    private LocalDateTime data;
 
     public Avaliacao() {
     }
@@ -70,11 +70,11 @@ public class Avaliacao {
         this.comentario = comentario;
     }
 
-    public LocalDateTime getDataAvaliacao() {
-        return this.dataAvaliacao;
+    public LocalDateTime getData() {
+        return this.data;
     }
 
-    public void setDataAvaliacao(LocalDateTime dataAvaliacao) {
-        this.dataAvaliacao = dataAvaliacao;
+    public void setData(LocalDateTime data) {
+        this.data = data;
     }
 }

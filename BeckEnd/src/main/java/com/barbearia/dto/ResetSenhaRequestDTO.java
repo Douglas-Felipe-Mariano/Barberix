@@ -1,6 +1,6 @@
 package com.barbearia.dto;
 
 public record ResetSenhaRequestDTO(
-    String token,
-    String novaSenha
+    String token
+   ,String novaSenha
 ) {}

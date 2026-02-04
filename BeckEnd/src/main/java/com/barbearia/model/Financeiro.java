@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.barbearia.model.enums.TipoLancametno;
+import com.barbearia.model.enums.TipoLancamento;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +33,7 @@ public class Financeiro {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "FIN_Tipo", nullable = false, length = 20) 
-    private TipoLancametno tipoLancametno;
+    private TipoLancamento tipoLancametno;
 
     @Column(name = "FIN_Descricao", length = 200, nullable = false)
     private String descricao;
@@ -65,11 +65,11 @@ public class Financeiro {
         this.agendamento = agendamento;
     }
 
-    public TipoLancametno getTipoLancametno() {
+    public TipoLancamento getTipoLancametno() {
         return this.tipoLancametno;
     }
 
-    public void setTipoLancametno(TipoLancametno tipoLancametno) {
+    public void setTipoLancamento(TipoLancamento tipoLancametno) {
         this.tipoLancametno = tipoLancametno;
     }
 
