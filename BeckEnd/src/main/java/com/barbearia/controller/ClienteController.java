@@ -1,10 +1,12 @@
 package com.barbearia.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.barbearia.model.Cliente;
+import com.barbearia.dto.request.ClienteRequestDTO;
+import com.barbearia.dto.response.ClienteResponseDTO;
 import com.barbearia.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,47 +33,47 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
+
+    //Requisição de Cadastro interno, a requisição de autocadastro estara no authcontroller
     @PostMapping
-    public ResponseEntity<?> cadastrarCliente(@RequestBody Cliente cliente){
-        try{
-            Cliente novoCliente = clienteService.cadastrarCliente(cliente);
-            
-            return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
-        }
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA')")
+    public ResponseEntity<ClienteResponseDTO> cadastrarCliente(@RequestBody ClienteRequestDTO dto){
+        ClienteResponseDTO novoCliente = clienteService.cadastrarCliente(dto);
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                                             .path("/{id}")
+                                             .buildAndExpand(novoCliente.clienteId())
+                                             .toUri();
+                                             
+        return ResponseEntity.created(uri).body(novoCliente);
     }
 
+    
     @GetMapping
-    public ResponseEntity<List<Cliente>> buscarTodosCliente(){
-        List<Cliente> clientes = clienteService.buscarTodosCliente();
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA', 'BARBEIRO')")
+    public ResponseEntity<List<ClienteResponseDTO>> buscarTodosCliente(){
+        List<ClienteResponseDTO> clientes = clienteService.buscarTodosCliente();
 
         return new ResponseEntity<>(clientes, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> buscarClientePorId(@PathVariable Integer id){
-        return clienteService.buscarClientePorId(id)
-                             .map(cliente -> new ResponseEntity<>(cliente, HttpStatus.OK)) //Se Optional tiver um valor retorna OK
-                             .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); //Se Optional estiver vazio retorna uma resposta Not Found
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ClienteResponseDTO> buscarClientePorId(@PathVariable Integer id){
+        return ResponseEntity.ok(clienteService.buscarClientePorId(id)); 
     } 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> atualizarCliente(@PathVariable Integer id, @RequestBody Cliente detalheCliente){
-        try{
-            Cliente clienteAtualizado = clienteService.atualizaCliente(id, detalheCliente);
-            return new ResponseEntity<>(clienteAtualizado, HttpStatus.OK); 
-        } catch (RuntimeException a){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); //se o serviço lançar a exceprion de cliente não encontrado, retorna Not Found 
-        }
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA') or isAuthenticated()")
+    public ResponseEntity<ClienteResponseDTO> atualizarCliente(@PathVariable Integer id, @RequestBody ClienteRequestDTO dto){
+        return ResponseEntity.ok(clienteService.atualizaCliente(id,dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA')")
     public ResponseEntity<Void> deletarCliente(@PathVariable Integer id){
-        if (clienteService.buscarClientePorId(id).isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); //Se o cliente não for encontrado retorna Not Found
-        }
+        clienteService.deletarCliente(id);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); //Temporariamente não deleta nada
+        return ResponseEntity.noContent().build();
     }
 }

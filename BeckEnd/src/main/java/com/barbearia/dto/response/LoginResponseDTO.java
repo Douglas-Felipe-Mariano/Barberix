@@ -1,4 +1,4 @@
-package com.barbearia.dto;
+package com.barbearia.dto.response;
 
 public record LoginResponseDTO(
     String  token

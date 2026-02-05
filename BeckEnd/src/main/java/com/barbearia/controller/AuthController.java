@@ -6,10 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.barbearia.dto.EsqueceuSenhaRequestDTO;
-import com.barbearia.dto.LoginRequestDTO;
-import com.barbearia.dto.LoginResponseDTO;
-import com.barbearia.dto.ResetSenhaRequestDTO;
+import com.barbearia.dto.response.LoginResponseDTO;
+import com.barbearia.dto.request.EsqueceuSenhaRequestDTO;
+import com.barbearia.dto.request.LoginRequestDTO;
+import com.barbearia.dto.request.ResetSenhaRequestDTO;
 import com.barbearia.exception.CredenciaisInvalidasException; 
 import com.barbearia.model.Usuario;
 import com.barbearia.service.JwtService;

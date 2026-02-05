@@ -1,5 +1,9 @@
 package com.barbearia.model;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +37,10 @@ public class Cliente {
 
     @Column(name = "CLI_FotoUrl", columnDefinition = "VARCHAR(MAX)")
     private String fotoUrl;
+
+    @CreationTimestamp
+    @Column(name = "CLI_DataCadastro", nullable = false, updatable = false)
+    private LocalDateTime dataCadastro;
 
 
     public Cliente() {
@@ -86,5 +94,15 @@ public class Cliente {
     public void setFotoUrl(String fotoUrl) {
         this.fotoUrl = fotoUrl;
     }
+
+
+    public LocalDateTime getDataCadastro() {
+        return this.dataCadastro;
+    }
+
+    public void setDataCadastro(LocalDateTime dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
+
 
 }

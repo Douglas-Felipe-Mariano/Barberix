@@ -1,69 +1,111 @@
 package com.barbearia.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.barbearia.exception.BusinesRuleException;
+import com.barbearia.dto.request.ClienteRequestDTO;
+import com.barbearia.dto.response.ClienteResponseDTO;
 import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Cliente;
+import com.barbearia.model.Usuario;
 import com.barbearia.repository.ClienteRepository;
+import com.barbearia.repository.UsuarioRepository;
 
 @Service
 public class ClienteService {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Autowired
     private ClienteRepository clienteRepository;
+    
 
-    public Cliente cadastrarCliente(Cliente cliente){
-        Optional<Cliente> clienteExistenete = clienteRepository.findByEmail(cliente.getEmail());
-        
-        //Verifica se o email ja existe no banco de dados   
-        if (clienteExistenete.isPresent()){
-            throw new BusinesRuleException("E-mail já cadastrado no sistema");
+    public ClienteResponseDTO cadastrarCliente(ClienteRequestDTO dto){
+        Cliente cliente = new Cliente();
+
+        cliente.setNome(dto.nome());
+        cliente.setTelefone(dto.telefone());
+        cliente.setEndereco(dto.endereco());
+        cliente.setFotoUrl(dto.fotoUrl());
+
+        if (dto.usuarioId() != null){
+           Usuario usuario = usuarioRepository.findById(dto.usuarioId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("Usuário com o id: " + dto.usuarioId() + " não encontrado"));
+
+           cliente.setUsuario(usuario);
+        } else 
+        {
+            cliente.setUsuario(null);
         }
 
-        return clienteRepository.save(cliente);
+        Cliente clienteSalvo = clienteRepository.save(cliente);
+
+        return convertToDTO(clienteSalvo);
     }
 
-    public List<Cliente> buscarTodosCliente(){
-        return clienteRepository.findAll();
+    public List<ClienteResponseDTO> buscarTodosCliente(){
+        List<Cliente> clientes = clienteRepository.findAll();
+
+        return clientes.stream()
+                       .map(this::convertToDTO)
+                       .collect(Collectors.toList());
     }
 
-    public Optional<Cliente> buscarClientePorId(Integer id){
-        return clienteRepository.findById(id);
+    public ClienteResponseDTO buscarClientePorId(Integer id){
+        Cliente cliente = clienteRepository.findById(id)
+                                            .orElseThrow(() -> new ResourceNotFoundException("Cliente com o id: " + id + " não encontrado"));
+        return convertToDTO(cliente);
     }
 
-    public Cliente atualizaCliente(Integer id ,Cliente detalheCliente){
+    public ClienteResponseDTO atualizaCliente(Integer id ,ClienteRequestDTO dto){
         Cliente clienteExistente = clienteRepository.findById(id)
                                                     .orElseThrow(() -> new ResourceNotFoundException("Cliente com o id: " + id + " não encontrado"));
 
-        if (detalheCliente.getNome() != null){
-            clienteExistente.setNome(detalheCliente.getNome());         
+        if (dto.nome() != null){
+            clienteExistente.setNome(dto.nome());         
         }
-        if (detalheCliente.getEmail() != null){
-            //Valida se o email ja está em uso por outra pessoa
-            Optional<Cliente> verificaEmail = clienteRepository.findByEmail(detalheCliente.getEmail());
-            if (verificaEmail.isPresent() && !verificaEmail.get().getClienteId().equals(clienteExistente.getClienteId())){
-                throw new BusinesRuleException("E-mail já cadastrado no sistema");
-            }
-            clienteExistente.setEmail(detalheCliente.getEmail());
+        if(dto.telefone() != null){
+            clienteExistente.setTelefone(dto.telefone());
         }
-        if(detalheCliente.getTelefone() != null){
-            clienteExistente.setTelefone(detalheCliente.getTelefone());
-        }
-        if (detalheCliente.getEndereco() != null){
-            clienteExistente.setEndereco(detalheCliente.getEndereco());    
+        if (dto.endereco() != null){
+            clienteExistente.setEndereco(dto.endereco());    
         }
 
-        return clienteRepository.save(clienteExistente);
+        if(dto.fotoUrl() != null){
+            clienteExistente.setFotoUrl(dto.fotoUrl());
+        }   
+
+        Cliente clienteAtualizado = clienteRepository.save(clienteExistente);
+        
+        return convertToDTO(clienteAtualizado);
     }
      public void deletarCliente(Integer id) {
         Cliente cliente = clienteRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Cliente com o id: " + id + " não encontrado"));
         clienteRepository.delete(cliente);
     }
+
+    private ClienteResponseDTO convertToDTO(Cliente cliente){
+        String emailUsuario = null;
+        if(cliente.getUsuario() != null){
+            emailUsuario = cliente.getUsuario().getEmail();
+        }
+
+        return new ClienteResponseDTO(
+            cliente.getClienteId(),
+            cliente.getNome(),
+            cliente.getTelefone(),
+            emailUsuario,
+            cliente.getEndereco(),
+            cliente.getFotoUrl(),
+            cliente.getDataCadastro()
+        );
+    }
+
 
     //Adicionar soft delet futuramente - ou mecanismo explicito de inativação de clientes
 

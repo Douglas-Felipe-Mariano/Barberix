@@ -1,4 +1,4 @@
-package com.barbearia.dto;
+package com.barbearia.dto.request;
 
 public record EsqueceuSenhaRequestDTO(
     String email

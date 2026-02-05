@@ -1,6 +1,6 @@
 package com.barbearia.model.enums;
 
-public enum TipoLancametno {
+public enum TipoLancamento {
     RECEITA,
     DESPESA
 }

@@ -1,4 +1,4 @@
-package com.barbearia.dto;
+package com.barbearia.dto.request;
 
 public record LoginRequestDTO(
     String email
