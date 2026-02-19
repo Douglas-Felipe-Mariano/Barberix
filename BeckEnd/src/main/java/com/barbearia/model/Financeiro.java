@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.barbearia.dto.request.FinanceiroRequestDTO;
 import com.barbearia.model.enums.TipoLancamento;
 
 import jakarta.persistence.Column;
