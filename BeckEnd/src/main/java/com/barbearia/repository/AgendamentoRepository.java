@@ -14,11 +14,16 @@ import com.barbearia.dto.RankingBarbeiroDTO;
 import com.barbearia.dto.RankingServicoDTO;
 import com.barbearia.model.Agendamento;
 import com.barbearia.model.Barbeiro;
+import com.barbearia.model.Cliente;
 import com.barbearia.model.enums.StatusPagamento;
 
 @Repository
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Integer> {
     Optional<Agendamento> findByBarbeiroAndDataAgendada(Barbeiro barbeiro, LocalDateTime dataAgendada);
+
+    List<Agendamento> findByBarbeiro(Barbeiro barbeiro);
+
+    List<Agendamento> findByCliente(Cliente cliente);
 
     List<Agendamento> findByDataAgendada(LocalDateTime dataAgendada);
     

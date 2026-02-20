@@ -62,6 +62,9 @@ public class Agendamento {
     @Column(name = "AGEND_DataPagamento", nullable = true)
     private LocalDateTime dataPagamento;
 
+    @Column(name = "AGEND_MotivoCancelamento", length = 500)
+    private String motivoCancelamento;
+
 
     public Agendamento() {
     }
@@ -146,5 +149,15 @@ public class Agendamento {
     public void setDataPagamento(LocalDateTime dataPagamento) {
         this.dataPagamento = dataPagamento;
     }
+
+
+    public String getMotivoCancelamento() {
+        return this.motivoCancelamento;
+    }
+
+    public void setMotivoCancelamento(String motivoCancelamento) {
+        this.motivoCancelamento = motivoCancelamento;
+    }
+
 
 }

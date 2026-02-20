@@ -5,10 +5,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.barbearia.dto.request.AgendamentoRequestDTO;
+import com.barbearia.dto.response.AgendamentoResponseDTO;
 import com.barbearia.exception.BusinesRuleException;
 import com.barbearia.exception.ResourceNotFoundException;
 import com.barbearia.model.Agendamento;
@@ -20,7 +23,10 @@ import com.barbearia.model.enums.DiaSemana;
 import com.barbearia.model.enums.FormaPagamento;
 import com.barbearia.model.enums.StatusPagamento;
 import com.barbearia.repository.AgendamentoRepository;
+import com.barbearia.repository.BarbeiroRepository;
+import com.barbearia.repository.ClienteRepository;
 import com.barbearia.repository.HorarioTrabalhoRepository;
+import com.barbearia.repository.ServicoRepository;
 
 @Service
 public class AgendamentoService {
@@ -32,144 +38,107 @@ public class AgendamentoService {
     private HorarioTrabalhoRepository horarioTrabalhoRepository;
 
     @Autowired
-    private BarbeiroService barbeiroService;
+    private BarbeiroRepository barbeiroRepository;
 
     @Autowired
-    private ClienteService clienteService;
+    private ClienteRepository clienteRepository;
 
     @Autowired
-    private ServicoService servicoService;
+    private ServicoRepository servicoRepository;
 
-    public Agendamento criarAgendamento(Agendamento agendamento){
+    public AgendamentoResponseDTO criarAgendamento(AgendamentoRequestDTO dto){
         //Valida se o cliente Existe 
-        Cliente cliente = clienteService.buscarClientePorId(agendamento.getCliente().getClienteId())
+        Cliente cliente = clienteRepository.findById(dto.clienteId())
                                         .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
         //Valida se o barbeiro existe e está ativo
-        Barbeiro barbeiro = barbeiroService.buscarBarbeiroAtivoPorId(agendamento.getBarbeiro().getBarbeiroId())
+        Barbeiro barbeiro = barbeiroRepository.findById(dto.barbeiroId())
                                            .orElseThrow(() -> new ResourceNotFoundException("Barbeiro não encontrado ou Inativo"));
 
         //Valida se o serviço existe 
-        Servico servico = servicoService.buscaServicoPorId(agendamento.getServico().getServicoId())                                        
+        Servico servico = servicoRepository.findById(dto.servicoId())
                                         .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
 
         //Valida se o barbeiro está disponivel no horario desejado                                        
-        Optional<Agendamento> validaHorario = agendamentoRepository
-                                              .findByBarbeiroAndDataAgendada(barbeiro, agendamento.getDataAgendada());
+        validarDisponibilidade(barbeiro, dto.dataAgendada(), null);
         
-        if (validaHorario.isPresent()){
-            throw new BusinesRuleException("Este barbeiro já possui um agendamento neste horario");
-        }                         
-        
-        LocalDateTime dataHoraAgendamento = agendamento.getDataAgendada();
-
-        DayOfWeek diaJava = dataHoraAgendamento.getDayOfWeek();
-        LocalTime horaAgendamento = dataHoraAgendamento.toLocalTime();
-
-        DiaSemana diaEnum;
-        try{
-            diaEnum = DiaSemana.valueOf(diaJava.name()); //Tentativa de conversao direta
-        } catch (IllegalArgumentException e){
-            diaEnum = converterDiaSemana(diaJava);
-        }
-
-        List<HorarioTrabalho> horariosTrabalhos = horarioTrabalhoRepository.findByBarbeiroAndDiaSemanaAndAtivo(barbeiro, diaEnum, true);
-
-        if (horariosTrabalhos.isEmpty()){
-            throw new BusinesRuleException("O barbeiro não trabalha neste dia da semana.");
-        }
-
-        boolean dentroDoHorario = false;
-        for ( HorarioTrabalho turno : horariosTrabalhos){
-            LocalTime inicoTurno = turno.getHoraInicio();
-            LocalTime fimTurno   = turno.getHoraFim();
-
-            if ((horaAgendamento.isAfter(inicoTurno) || horaAgendamento.equals(inicoTurno)) && (horaAgendamento.isBefore(fimTurno))){
-                dentroDoHorario = true;
-                break;
-            }
-        }
-
-        if (!dentroDoHorario){
-            throw new BusinesRuleException("O barbeiro não atende neste horario");
-        }
-        
-        //Seta preco do servico para o agendamento
-        agendamento.setValor(servico.getPreco());
-
-        //Cria o agendamento com os objetos completos, não só com id
+        Agendamento agendamento = new Agendamento();
         agendamento.setCliente(cliente);
         agendamento.setBarbeiro(barbeiro);
         agendamento.setServico(servico);
+        agendamento.setDataAgendada(dto.dataAgendada());
+        agendamento.setValor(servico.getPreco());
+        agendamento.setStatusPagamento(StatusPagamento.PENDENTE);
 
-        return agendamentoRepository.save(agendamento) ;
+        Agendamento salvo = agendamentoRepository.save(agendamento);
+        
+        return convertToDTO(salvo);
     }
 
-    public List<Agendamento> buscarTodosAgendamentos(){
-        return agendamentoRepository.findAll();
+    public List<AgendamentoResponseDTO> buscarTodosAgendamentos(){
+        return agendamentoRepository.findAll()
+                                    .stream()
+                                    .map(this::convertToDTO)
+                                    .collect(Collectors.toList());
     }
 
-    public List<Agendamento> buscarAgendamentoPorData(LocalDateTime dataAgendamento){
-        return agendamentoRepository.findAllByDate(dataAgendamento);
+    public List<AgendamentoResponseDTO> buscarAgendamentoPorData(LocalDateTime dataAgendamento){
+        return agendamentoRepository.findAllByDate(dataAgendamento)
+                                    .stream()
+                                    .map(this::convertToDTO)
+                                    .collect(Collectors.toList());  
     }
 
-    public Optional<Agendamento> buscarAgendamentoPorId(Integer id){
-        return agendamentoRepository.findById(id);
+    public Optional<AgendamentoResponseDTO> buscarAgendamentoPorId(Integer id){
+       return agendamentoRepository.findById(id)
+                                    .map(this::convertToDTO);
     }
 
-    public Agendamento atualizarAgendamento(Integer id, Agendamento detalheAgendamento){
+    public AgendamentoResponseDTO atualizarAgendamento(Integer id, AgendamentoRequestDTO dto){
         //Recupera o agendamento existente ou retorna uma exception
         Agendamento agendamentoExistente = agendamentoRepository.findById(id)
                                                                  .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado"));
 
-        //Valida se o cliente foi alterado
-        Cliente clienteAtualizado = agendamentoExistente.getCliente();
-        if (detalheAgendamento.getCliente() != null){
-            clienteAtualizado = clienteService.buscarClientePorId(detalheAgendamento.getCliente().getClienteId())
-                                              .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
-        }
+        //Valida se houve mudança no horario ou barbeiro                                                                 
+        boolean alterouBarbeiro = !agendamentoExistente.getBarbeiro().getBarbeiroId().equals(dto.barbeiroId());                                                                 
+        boolean alterouData = !agendamentoExistente.getDataAgendada().equals(dto.dataAgendada());
+        
         
         //Valida se o barbeiro foi alterado
-        Barbeiro barbeiroAtualizado = agendamentoExistente.getBarbeiro();
-        if (detalheAgendamento.getBarbeiro() != null) {
-            barbeiroAtualizado = barbeiroService.buscarBarbeiroAtivoPorId(detalheAgendamento.getBarbeiro().getBarbeiroId())
-                                                .orElseThrow(() -> new ResourceNotFoundException("Barbeiro não encontrado ou Inativo"));
+        if (alterouBarbeiro || alterouData){
+            Barbeiro barbeiroAtualizado = barbeiroRepository.findById(dto.barbeiroId())
+                                                            .orElseThrow(() -> new ResourceNotFoundException("Barbeiro não encontrado ou Inativo"));
+
+            //Valida a disponibilidade do barbeiro no novo horario
+            validarDisponibilidade(barbeiroAtualizado, dto.dataAgendada(), id);
+
+            agendamentoExistente.setBarbeiro(barbeiroAtualizado);
+            agendamentoExistente.setDataAgendada(dto.dataAgendada());
+        } 
+
+        // 3. Verifica se houve mudança no Cliente
+        if (!agendamentoExistente.getCliente().getClienteId().equals(dto.clienteId())) {
+            Cliente novoCliente = clienteRepository.findById(dto.clienteId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
+            agendamentoExistente.setCliente(novoCliente);
         }
 
         //Valida se o servico foi alterado
-        Servico servicoAtualizado = agendamentoExistente.getServico();
-        if (detalheAgendamento.getServico() != null){
-            servicoAtualizado = servicoService.buscaServicoPorId(detalheAgendamento.getServico().getServicoId())
+        if (dto.servicoId() != null){
+            Servico novoServico = servicoRepository.findById(dto.servicoId())
                                               .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
+
+            agendamentoExistente.setServico(novoServico);
+            agendamentoExistente.setValor(novoServico.getPreco());
         }
 
-        //Valida se a data foi alterada
-        LocalDateTime dataAtualizada = agendamentoExistente.getDataAgendada();
-        if (detalheAgendamento.getDataAgendada() != null){
-            dataAtualizada = detalheAgendamento.getDataAgendada();
-        }
 
-        //Valida se o barbeiro ou a data foram alterados e checa se há conflito 
-        if (detalheAgendamento.getBarbeiro() != null || detalheAgendamento.getDataAgendada() != null){
-            Optional<Agendamento> conflitoHorario = agendamentoRepository
-                                                   .findByBarbeiroAndDataAgendada(barbeiroAtualizado, dataAtualizada);
-            if (conflitoHorario.isPresent() && !conflitoHorario.get().getAgendamentoId().equals(id)){
-                throw new BusinesRuleException("Esse barbeiro já possui um agendamento neste horario");
-            }
-        }
+        Agendamento atualizado = agendamentoRepository.save(agendamentoExistente);
 
-        agendamentoExistente.setCliente(clienteAtualizado);
-        agendamentoExistente.setBarbeiro(barbeiroAtualizado);
-        agendamentoExistente.setServico(servicoAtualizado);
-        agendamentoExistente.setDataAgendada(dataAtualizada);
-
-        //Seta valor conforme o serviço correspondente
-        agendamentoExistente.setValor(servicoAtualizado.getPreco());
-
-        return agendamentoRepository.save(agendamentoExistente);
+        return convertToDTO(atualizado);
     }
 
-    public Agendamento pagarAgendamento(Integer agendamentoId, FormaPagamento formaPagamento){
+    public AgendamentoResponseDTO pagarAgendamento(Integer agendamentoId, FormaPagamento formaPagamento){
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                                                        .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado."));
         
@@ -181,10 +150,10 @@ public class AgendamentoService {
         agendamento.setFormaPagamento(formaPagamento);
         agendamento.setDataPagamento(LocalDateTime.now());
 
-        return agendamentoRepository.save(agendamento);
+        return convertToDTO(agendamentoRepository.save(agendamento));
     }
 
-    public void cancelarAgendamento(Integer agendamentoId){
+    public AgendamentoResponseDTO cancelarAgendamento(Integer agendamentoId){
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                                                        .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado!"));
 
@@ -194,7 +163,7 @@ public class AgendamentoService {
 
         agendamento.setStatusPagamento(StatusPagamento.CANCELADO);
         
-        agendamentoRepository.save(agendamento);
+        return convertToDTO(agendamentoRepository.save(agendamento));
     }
 
     public void deletarAgendamento(Integer id){
@@ -216,5 +185,61 @@ public class AgendamentoService {
             default:
                 throw new IllegalArgumentException("Dia da semana inesperado: " + diaJava);
         }
+    }
+
+    private void validarDisponibilidade(Barbeiro barbeiro, LocalDateTime dataAgendada, Integer agendamentoIdIgnorado) {
+        // 1. Conflito de Agendamento
+        Optional<Agendamento> conflito = agendamentoRepository.findByBarbeiroAndDataAgendada(barbeiro, dataAgendada);
+        if (conflito.isPresent() && !conflito.get().getAgendamentoId().equals(agendamentoIdIgnorado)) {
+            throw new BusinesRuleException("Este barbeiro já possui um agendamento neste horário");
+        }
+
+        // Valida o turno   
+        DayOfWeek diaJava = dataAgendada.getDayOfWeek();
+        LocalTime horaAgendamento = dataAgendada.toLocalTime();
+
+        DiaSemana diaEnum;
+        try {
+            diaEnum = DiaSemana.valueOf(diaJava.name());
+        } catch (IllegalArgumentException e) {
+            diaEnum = converterDiaSemana(diaJava);
+        }
+
+        List<HorarioTrabalho> horariosTrabalhos = horarioTrabalhoRepository.findByBarbeiroAndDiaSemanaAndAtivo(barbeiro, diaEnum, true);
+
+        if (horariosTrabalhos.isEmpty()) {
+            throw new BusinesRuleException("O barbeiro não trabalha neste dia da semana.");
+        }
+
+        boolean dentroDoHorario = false;
+        for (HorarioTrabalho turno : horariosTrabalhos) {
+            LocalTime inicioTurno = turno.getHoraInicio();
+            LocalTime fimTurno = turno.getHoraFim();
+
+            if ((horaAgendamento.equals(inicioTurno) || horaAgendamento.isAfter(inicioTurno)) && horaAgendamento.isBefore(fimTurno)) {
+                dentroDoHorario = true;
+                break;
+            }
+        }
+
+        if (!dentroDoHorario) {
+            throw new BusinesRuleException("O barbeiro não atende neste horário");
+        }
+    }
+
+    private AgendamentoResponseDTO convertToDTO(Agendamento agendamento) {
+        return new AgendamentoResponseDTO(
+            agendamento.getAgendamentoId()
+           ,agendamento.getCliente()         .getClienteId()
+           ,agendamento.getCliente()         .getNome()
+           ,agendamento.getServico()         .getServicoId()
+           ,agendamento.getServico()         .getNome()
+           ,agendamento.getBarbeiro()        .getBarbeiroId()
+           ,agendamento.getBarbeiro()        .getNome()
+           ,agendamento.getStatusPagamento()
+           ,agendamento.getDataAgendada()
+           ,agendamento.getValor()
+           ,agendamento.getFormaPagamento()
+        );
     }
 }

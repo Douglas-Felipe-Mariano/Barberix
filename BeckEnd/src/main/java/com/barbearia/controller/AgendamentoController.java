@@ -1,10 +1,11 @@
 package com.barbearia.controller;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,9 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-
-import com.barbearia.model.Agendamento;
+import com.barbearia.dto.request.AgendamentoRequestDTO;
+import com.barbearia.dto.response.AgendamentoResponseDTO;
 import com.barbearia.model.enums.FormaPagamento;
 import com.barbearia.service.AgendamentoService;
 
@@ -34,55 +36,62 @@ public class AgendamentoController {
     @Autowired
     private AgendamentoService agendamentoService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'BARBEIRO', 'CLIENTE', 'ATENDENTE')")
     @PostMapping
-    public ResponseEntity<?> criarAgendamento(@RequestBody Agendamento agendamento){
-        Agendamento novoAgendamento = agendamentoService.criarAgendamento(agendamento);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AgendamentoResponseDTO> criarAgendamento(@RequestBody AgendamentoRequestDTO dto){
+        AgendamentoResponseDTO novoAgendamento = agendamentoService.criarAgendamento(dto);
 
-        return new ResponseEntity<>(novoAgendamento, HttpStatus.CREATED);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                                              .path("/{id}")
+                                              .buildAndExpand(novoAgendamento.agendamentoId())
+                                              .toUri();
+
+        return ResponseEntity.created(uri).body(novoAgendamento);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AgendamentoResponseDTO> buscarAgendamentoPorId(@PathVariable Integer id){
+        return agendamentoService.buscarAgendamentoPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
     @GetMapping
-    public ResponseEntity<List<Agendamento>> buscarTodosAgendamentos(){
-        List<Agendamento> agendamentos = agendamentoService.buscarTodosAgendamentos();
-
-        return new ResponseEntity<>(agendamentos, HttpStatus.OK);
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA', 'BARBEIRO')")
+    public ResponseEntity<List<AgendamentoResponseDTO>> buscarTodosAgendamentos(){
+        return ResponseEntity.ok(agendamentoService.buscarTodosAgendamentos());
     }
 
-    @GetMapping("/data/{data}")
-    public ResponseEntity<List<Agendamento>> buscarAgendamentosPorData(@PathVariable LocalDateTime data){
-        List<Agendamento> agendamentos = agendamentoService.buscarAgendamentoPorData(data);
-
-        return new ResponseEntity<>(agendamentos, HttpStatus.OK);
+    @GetMapping("/data")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA', 'BARBEIRO')")
+    public ResponseEntity<List<AgendamentoResponseDTO>> buscarAgendamentosPorData(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime data){
+        return ResponseEntity.ok(agendamentoService.buscarAgendamentoPorData(data));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarAgendamento(@PathVariable Integer id, @RequestBody Agendamento detalheAgendamento){
-        Agendamento novoAgendamento = agendamentoService.atualizarAgendamento(id, detalheAgendamento);
-
-        return new ResponseEntity<>(novoAgendamento, HttpStatus.OK);
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA') or isAuthenticated()")
+    public ResponseEntity<AgendamentoResponseDTO> atualizarAgendamento(@PathVariable Integer id, @RequestBody AgendamentoRequestDTO dto){
+        return ResponseEntity.ok(agendamentoService.atualizarAgendamento(id, dto));
     }
 
     @PostMapping("/{id}/pagar")
-    public ResponseEntity<Agendamento> pagarAgendamento(@PathVariable Integer id, @RequestParam FormaPagamento formaPagamento){
-        Agendamento agendamentoPago = agendamentoService.pagarAgendamento(id, formaPagamento);
-
-        return new ResponseEntity<>(agendamentoPago, HttpStatus.OK);
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA', 'CLIENTE')")
+    public ResponseEntity<AgendamentoResponseDTO> pagarAgendamento(@PathVariable Integer id, @RequestParam FormaPagamento formaPagamento){
+        return ResponseEntity.ok(agendamentoService.pagarAgendamento(id, formaPagamento));
     }
 
     @PostMapping("/{id}/cancelar")
-    public ResponseEntity<Void> cancelarAgendamento(@PathVariable Integer id){
-        agendamentoService.cancelarAgendamento(id);
-        
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AgendamentoResponseDTO> cancelarAgendamento(@PathVariable Integer id){
+        return ResponseEntity.ok(agendamentoService.cancelarAgendamento(id));
     }
 
-
-
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deletarAgendamento(@PathVariable Integer id){
         agendamentoService.deletarAgendamento(id);
         
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
